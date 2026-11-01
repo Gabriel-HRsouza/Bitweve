@@ -1,22 +1,36 @@
-# BitWeve
+# BitWeve Ultimate — Simulador de Vida Real
 
-Simulador de vida interativo para dispositivos móveis, desenvolvido em Flutter e Dart. O projeto foca em simulação profunda baseada em decisões textuais e dinâmicas, com identidade visual própria, motor de eventos procedurais e persistência local completa.
+<p align="center">
+  <img src="assets/icons/logo.png" width="128" height="128" alt="BitWeve Logo" />
+</p>
 
-Todos os recursos do jogo são totalmente gratuitos e desbloqueados, sem moedas pagas, assinaturas ou microtransações.
+<p align="center">
+  <b>Simulador de vida profundo, 100% interativo, visualmente profissional e offline para Android e iOS.</b><br/>
+  Desenvolvido em Flutter e Dart com persistência local em SQLite nativo (Drift).
+</p>
+
+<p align="center">
+  <a href="https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.0.0.apk">
+    <img src="https://img.shields.io/badge/Download_APK-Direto_(v1.0.0)-00F2FE?style=for-the-badge&logo=android&logoColor=black" alt="Download APK Direto" />
+  </a>
+  <a href="https://github.com/Gabriel-HRsouza/Bitweve/releases">
+    <img src="https://img.shields.io/badge/GitHub-Releases-10B981?style=for-the-badge&logo=github&logoColor=white" alt="Releases" />
+  </a>
+</p>
 
 ---
 
-## Como Baixar e Instalar o Jogo
+## 📱 Como Baixar e Instalar no Celular Android
 
-### No Android
+### Método Recomendado: Download Direto (Super Fácil)
+1. **Baixe o arquivo diretamente no seu celular:**  
+   👉 **[Clique aqui para Baixar o BitWeve v1.0.0 APK](https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.0.0.apk)**  
+   *(Também disponível na pasta `release/BitWeve-v1.0.0.apk` neste repositório ou na aba [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases))*.
+2. Ao concluir o download, abra o arquivo baixado (`BitWeve-v1.0.0.apk`) pela barra de notificações ou pelo gerenciador de arquivos do celular.
+3. Se o Android solicitar autorização para instalar de fontes desconhecidas pelo navegador, toque em **Permitir desta fonte**.
+4. Toque em **Instalar** e abra o jogo! Todos os sistemas funcionam 100% offline e gratuitamente.
 
-#### Método 1: Instalação Direta via APK (Recomendado)
-1. Baixe o instalador oficial diretamente: [Baixar BitWeve v1.0.0 (APK)](https://github.com/Gabriel-HRsouza/Bitweve/releases/download/v1.0.0/BitWeve-v1.0.0.apk) ou acesse a página de [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases).
-2. No seu celular Android, abra o arquivo baixado (`BitWeve-v1.0.0.apk`).
-3. Se o sistema solicitar, autorize a instalação de aplicativos de fontes desconhecidas para o navegador ou gerenciador de arquivos.
-4. Toque em **Instalar** e abra o jogo quando o processo for concluído.
-
-*Observação para desenvolvedores:* Caso você clone o código e compile manualmente, o instalador gerado ficará em:
+*Observação para desenvolvedores:* Caso clone o código e compile manualmente, o instalador gerado ficará em:  
 `build/app/outputs/flutter-apk/app-release.apk`
 
 ---
@@ -56,12 +70,16 @@ Se você utiliza AltStore ou Sideloadly no Windows ou Mac:
 ## Principais Sistemas do Jogo
 
 - **Persistência Local Real**: O jogo utiliza SQLite nativo via Drift. Todo o progresso fica salvo na memória privada do celular, mantendo as vidas e decisões salvas após fechar ou reiniciar o aparelho. Os dados só são apagados se o aplicativo for desinstalado.
-- **Motor Central de Envelhecimento**: O botão de avançar um ano calcula passagem de tempo, salários, despesas, impostos, saúde, estresse, reputação e eventos aleatórios.
+- **Motor Central de Envelhecimento**: O botão de avançar um ano calcula passagem de tempo, salários, despesas, impostos, saúde, estresse, reputação e eventos aleatórios com efeitos sonoros hápticos e sonoros em todos os botões.
+- **Saúde Avançada & Neurodesenvolvimento**: Representação clínica individualizada de TEA, TDAH, Dislexia, Depressão, Ansiedade, Bipolaridade, Diabetes, Asma e Hipertensão. Acesso ao SUS, planos de saúde particulares, consultas com especialistas, psicoterapia e farmácia.
+- **Mercado Cripto & Bolsa**: Gráficos dinâmicos interativos com Bitcoin (BTC), Ethereum (ETH) e BitWeve Token (BWV), com ordens de compra e venda em tempo real e volatilidade calculada anualmente.
+- **Concessionária & Garagem**: Catálogo completo com motocicletas, sedãs, SUVs blindados, esportivos, iates e jatos, com gestão de manutenção anual, seguros e revenda.
+- **Empreendedorismo & Startups**: Fundação de empresas de tecnologia, restaurantes e agências. Contratação de equipes, investimentos em marketing, valuation dinâmico e realização de lucro via venda da empresa (Exit).
+- **Submundo, Crimes & Justiça**: Ações narrativas de risco, mandados de prisão em flagrante, antecedentes criminais e contratação de bancas de advogados para anulação de sentenças.
+- **Modo Deus Gratuito (God Mode)**: Painel acessível pelo ícone de raio dourado na AppBar para injeção de fundos, manipulação livre de atributos, milagre da cura total, indulto judicial e vitória garantida na loteria.
 - **Avatar Dinâmico com Expressões**: Sistema próprio de avatar vetorial procedural que reflete as emoções do protagonista (felicidade, tristeza, raiva, surpresa, doença, amor e medo).
-- **Relações Familiares e NPCs**: Pais, parentes e amigos envelhecem de forma sincronizada com o protagonista, possuem profissões e emoções próprias, e reagem a conversas, elogios e presentes.
-- **Educação e Carreira**: Passagem escolar, vestibulares para cursos de ensino superior e mercado de trabalho com dezenas de profissões nas áreas de tecnologia, medicina, direito, segurança pública, negócios e artes.
-- **Economia e Investimentos**: Carteira de investimentos com ativos de baixo, médio e alto risco (Renda Fixa, Ações e Criptomoedas), compra de imóveis e aquisição de veículos com custos de manutenção anual.
-- **Morte e Modo Dinastia**: Ao falecer, o jogador pode visualizar o epitáfio completo da vida e, caso tenha filhos, continuar jogando com o herdeiro para manter o patrimônio da família por gerações.
+- **Relações Familiares e NPCs Autônomos**: Pais, parentes e amigos envelhecem de forma sincronizada com o protagonista, possuem profissões e emoções próprias, e reagem a interações.
+- **Morte e Modo Dinastia**: Ao falecer, o jogador pode visualizar o epitáfio completo da vida e continuar jogando como herdeiro direto para perpetuar o patrimônio da família por gerações.
 - **Múltiplos Saves**: Gerenciador de vidas que permite criar e alternar entre diferentes personagens a qualquer momento.
 
 ---

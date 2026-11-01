@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/careers/presentation/careers_sheet.dart';
 import 'package:bitweve/features/character/models/avatar_config.dart';
@@ -8,10 +9,13 @@ import 'package:bitweve/features/character/presentation/widgets/avatar_widget.da
 import 'package:bitweve/features/events/presentation/widgets/event_dialog.dart';
 import 'package:bitweve/features/finances/presentation/finances_sheet.dart';
 import 'package:bitweve/features/relationships/presentation/relationships_sheet.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 import 'package:bitweve/shared/widgets/stat_bar_widget.dart';
 import 'package:bitweve/shared/widgets/timeline_log_tile.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
 import 'package:bitweve/features/life_engine/presentation/widgets/activities_sheet.dart';
+import 'package:bitweve/features/life_engine/presentation/widgets/god_mode_modal.dart';
+import 'package:bitweve/features/health/presentation/health_sheet.dart';
 
 class LifeScreen extends ConsumerWidget {
   const LifeScreen({super.key});
@@ -96,6 +100,21 @@ class LifeScreen extends ConsumerWidget {
               ),
             ),
             actions: [
+              BwTapFeedback(
+                sfx: GameSfx.buttonTap,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const GodModeModal(),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Icon(Icons.bolt, color: Colors.amber, size: 26),
+                ),
+              ),
               IconButton(
                 icon: const Icon(Icons.settings, color: AppColors.textSecondaryDark),
                 onPressed: () => context.push('/settings'),
@@ -299,26 +318,33 @@ class LifeScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Botão Principal: Avançar Ano
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            elevation: 4,
-                            shadowColor: AppColors.primary.withAlpha(120),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      // Botão Principal: Avançar Ano com som marcante e microanimação
+                      BwTapFeedback(
+                        sfx: GameSfx.ageUp,
+                        scaleFactor: 0.96,
+                        onTap: () {
+                          ref.read(lifeEngineProvider.notifier).advanceYear();
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF6C5CE7), Color(0xFF00F2FE)],
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6C5CE7).withAlpha(120),
+                                blurRadius: 18,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          onPressed: () {
-                            ref.read(lifeEngineProvider.notifier).advanceYear();
-                          },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.cake, size: 22),
+                              const Icon(Icons.cake, size: 22, color: Colors.white),
                               const SizedBox(width: 10),
                               Text(
                                 'Avançar para os ${char.currentAge + 1} Anos',
@@ -326,6 +352,7 @@ class LifeScreen extends ConsumerWidget {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.3,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
@@ -333,61 +360,88 @@ class LifeScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      // Botões de Ações Rápidas
+                      // Botões de Ações Rápidas (Relações, Carreira, Finanças, Atividades)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildDockButton(
-                            context: context,
-                            icon: Icons.people,
-                            label: 'Relações',
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => const RelationshipsSheet(),
-                              );
-                            },
+                          Expanded(
+                            child: _buildDockButton(
+                              context: context,
+                              icon: Icons.people,
+                              label: 'Relações',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const RelationshipsSheet(),
+                                );
+                              },
+                            ),
                           ),
-                          _buildDockButton(
-                            context: context,
-                            icon: Icons.work,
-                            label: 'Carreira',
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => const CareersSheet(),
-                              );
-                            },
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: _buildDockButton(
+                              context: context,
+                              icon: Icons.work,
+                              label: 'Carreira',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const CareersSheet(),
+                                );
+                              },
+                            ),
                           ),
-                          _buildDockButton(
-                            context: context,
-                            icon: Icons.account_balance,
-                            label: 'Finanças',
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => const FinancesSheet(),
-                              );
-                            },
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: _buildDockButton(
+                              context: context,
+                              icon: Icons.account_balance,
+                              label: 'Finanças',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const FinancesSheet(),
+                                );
+                              },
+                            ),
                           ),
-                          _buildDockButton(
-                            context: context,
-                            icon: Icons.bolt,
-                            label: 'Atividades',
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => const ActivitiesSheet(),
-                              );
-                            },
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: _buildDockButton(
+                              context: context,
+                              icon: Icons.favorite,
+                              label: 'Saúde',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const HealthSheet(),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: _buildDockButton(
+                              context: context,
+                              icon: Icons.bolt,
+                              label: 'Atividades',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const ActivitiesSheet(),
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -408,11 +462,12 @@ class LifeScreen extends ConsumerWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return BwTapFeedback(
+      sfx: GameSfx.buttonTap,
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.cardDark,
           borderRadius: BorderRadius.circular(12),
@@ -425,8 +480,10 @@ class LifeScreen extends ConsumerWidget {
             const SizedBox(height: 2),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimaryDark,
               ),

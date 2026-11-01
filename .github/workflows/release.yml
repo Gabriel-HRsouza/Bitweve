@@ -1,0 +1,65 @@
+name: Build & Release BitWeve Android APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Run Tests
+        run: flutter test
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: BitWeve Ultimate v1.0.0
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## BitWeve Ultimate — Simulador de Vida Real 📱
+            
+            Versão oficial do BitWeve com todos os módulos de simulação desbloqueados:
+            - **Saúde & Neurodesenvolvimento**: TEA, TDAH, Dislexia, Depressão, TAG, Bipolaridade, Diabetes, Asma, Hipertensão, SUS e Farmácia.
+            - **Criptomoedas com Gráficos**: BTC, ETH e BWV com trading e cotação em tempo real.
+            - **Concessionária e Garagem**: Motos, Sedãs, SUVs, Superesportivos, Iates e Jatos.
+            - **Empreendedorismo**: Startups, restaurantes, agências, contratação e exit.
+            - **Submundo & Justiça**: Crimes narrativos, flagrante, prisão e banca de advogados.
+            - **Modo Deus (God Mode)**: Atributos, fundos, cura milagrosa e Mega-Sena.
+            - **Dinastia**: Continuidade familiar como herdeiro por gerações.
+            - **Áudio Real**: Feedback sonoro em todos os botões e virada de ano.
+            
+            ### Como instalar no Android:
+            1. Baixe o arquivo `BitWeve-v1.0.0.apk` abaixo.
+            2. Toque no arquivo para instalar (autorize fontes desconhecidas se solicitado pelo navegador).
+            3. Abra e jogue offline gratuitamente!
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk

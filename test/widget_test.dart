@@ -10,8 +10,8 @@ void main() {
       ),
     );
 
-    // Avançar o tempo para que a animação da SplashScreen e o Future.delayed completem
-    await tester.pump(const Duration(seconds: 2));
+    // Avançar o tempo para que a animação da SplashScreen e o Timer completem
+    await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
     expect(find.byType(BitWeveApp), findsOneWidget);

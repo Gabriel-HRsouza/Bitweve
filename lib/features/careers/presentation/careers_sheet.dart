@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class CareersSheet extends ConsumerWidget {
   const CareersSheet({super.key});
@@ -18,7 +19,7 @@ class CareersSheet extends ConsumerWidget {
     final availableCareers = service.availableCareers;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: MediaQuery.of(context).size.height * 0.85,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: const BoxDecoration(
         color: AppColors.surfaceDark,
@@ -39,7 +40,7 @@ class CareersSheet extends ConsumerWidget {
             ),
           ),
           const Text(
-            'Carreira & Ocupação',
+            'Carreira & Profissão',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -47,18 +48,19 @@ class CareersSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
+
           // Emprego Atual ou Status
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primary.withAlpha(40),
+                  AppColors.primary.withAlpha(45),
                   AppColors.cardDark,
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primary.withAlpha(80), width: 1.5),
+              border: Border.all(color: AppColors.primary.withAlpha(90), width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,20 +68,24 @@ class CareersSheet extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      char.currentJobTitle ?? (char.currentAge < 18 ? 'Estudante' : 'Desempregado(a)'),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryDark,
+                    Expanded(
+                      child: Text(
+                        char.currentJobTitle ?? (char.currentAge < 18 ? 'Estudante' : 'Desempregado(a)'),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimaryDark,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (char.currentSalary != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withAlpha(30),
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.secondary.withAlpha(80)),
                         ),
                         child: Text(
                           'R\$ ${char.currentSalary!.toStringAsFixed(0)}/ano',
@@ -98,7 +104,7 @@ class CareersSheet extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Desempenho no Trabalho',
+                        'Desempenho Profissional',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
                       ),
                       Text(
@@ -118,23 +124,67 @@ class CareersSheet extends ConsumerWidget {
                       value: char.jobPerformance / 100.0,
                       minHeight: 6,
                       backgroundColor: Colors.white.withAlpha(20),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        char.jobPerformance >= 70 ? AppColors.statHealth : AppColors.primaryLight,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 14),
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                        child: BwTapFeedback(
+                          onTap: () => ref.read(lifeEngineProvider.notifier).workHard(),
+                          child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.bolt, size: 16, color: Colors.white),
+                                SizedBox(width: 6),
+                                Text('Trabalhar Duro', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
                           ),
-                          icon: const Icon(Icons.bolt, size: 16),
-                          label: const Text('Trabalhar Duro', style: TextStyle(fontSize: 13)),
-                          onPressed: () {
-                            ref.read(lifeEngineProvider.notifier).workHard();
-                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: BwTapFeedback(
+                          onTap: () => ref.read(lifeEngineProvider.notifier).askForRaise(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardDark,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.secondary.withAlpha(90)),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.trending_up, size: 16, color: AppColors.secondary),
+                                SizedBox(width: 6),
+                                Text('Pedir Aumento', style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      BwTapFeedback(
+                        onTap: () => ref.read(lifeEngineProvider.notifier).quitJob(),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withAlpha(25),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.redAccent.withAlpha(80)),
+                          ),
+                          child: const Icon(Icons.exit_to_app, size: 18, color: Colors.redAccent),
                         ),
                       ),
                     ],
@@ -144,21 +194,49 @@ class CareersSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Vagas de Emprego Disponíveis',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryDark,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Vagas de Emprego Disponíveis',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimaryDark,
+                ),
+              ),
+              BwTapFeedback(
+                onTap: () {
+                  ref.read(lifeEngineProvider.notifier).studyExtra();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Você completou um curso profissionalizante e seu intelecto subiu!')),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withAlpha(35),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.school, size: 14, color: AppColors.primaryLight),
+                      SizedBox(width: 4),
+                      Text('Fazer Curso (+QI)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryLight)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           Expanded(
             child: char.currentAge < 16
                 ? const Center(
                     child: Text(
-                      'Você precisa ter pelo menos 16 anos para trabalhar.',
+                      'Você precisa ter pelo menos 16 anos para ingressar no mercado de trabalho.',
                       style: TextStyle(color: AppColors.textSecondaryDark),
+                      textAlign: TextAlign.center,
                     ),
                   )
                 : ListView.builder(
@@ -166,42 +244,60 @@ class CareersSheet extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final job = availableCareers[index];
                       final isCurrent = job.id == char.currentJobId;
+                      final qualified = char.smarts >= job.minSmarts;
+
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
                           color: AppColors.cardDark,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.borderDark, width: 1),
+                          border: Border.all(
+                            color: isCurrent ? AppColors.secondary : AppColors.borderDark,
+                            width: isCurrent ? 1.5 : 1,
+                          ),
                         ),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           title: Text(
                             job.title,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
                               color: AppColors.textPrimaryDark,
+                              fontSize: 15,
                             ),
                           ),
                           subtitle: Text(
-                            '${job.field} • Inicial: R\$ ${job.entrySalary.toStringAsFixed(0)}/ano\nExige Intelecto ${job.minSmarts}%',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
+                            'Salário: R\$ ${job.entrySalary.toStringAsFixed(0)}/ano • Intelecto mín: ${job.minSmarts}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: qualified ? AppColors.textSecondaryDark : AppColors.accentRose,
+                            ),
                           ),
                           trailing: isCurrent
-                              ? const Chip(
-                                  label: Text('Atual', style: TextStyle(fontSize: 11)),
-                                  backgroundColor: AppColors.secondaryDark,
-                                )
-                              : ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    backgroundColor: AppColors.cardHoverDark,
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.secondary.withAlpha(30),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  onPressed: () {
-                                    ref.read(lifeEngineProvider.notifier).applyJob(job);
+                                  child: const Text('Emprego Atual', style: TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                                )
+                              : BwTapFeedback(
+                                  onTap: () {
                                     Navigator.pop(context);
+                                    ref.read(lifeEngineProvider.notifier).applyJob(job);
                                   },
-                                  child: const Text('Candidatar-se', style: TextStyle(fontSize: 12)),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: qualified ? AppColors.primary : AppColors.cardHoverDark,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'Candidatar-se',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                    ),
+                                  ),
                                 ),
                         ),
                       );

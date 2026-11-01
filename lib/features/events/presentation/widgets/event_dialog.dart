@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/events/models/life_event.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class EventDialog extends StatelessWidget {
   final LifeEvent event;
@@ -100,24 +102,25 @@ class EventDialog extends StatelessWidget {
             ...event.choices.map((choice) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.cardHoverDark,
-                    foregroundColor: Colors.white,
+                child: BwTapFeedback(
+                  sfx: GameSfx.buttonTap,
+                  onTap: () => onSelectChoice(choice),
+                  child: Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: AppColors.cardHoverDark,
                       borderRadius: BorderRadius.circular(14),
-                      side: const BorderSide(color: AppColors.borderDark, width: 1),
+                      border: Border.all(color: AppColors.borderDark, width: 1),
                     ),
-                    elevation: 0,
-                  ),
-                  onPressed: () => onSelectChoice(choice),
-                  child: Text(
-                    choice.label,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      choice.label,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

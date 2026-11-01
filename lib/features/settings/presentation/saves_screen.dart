@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/database/app_database.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class SavesScreen extends ConsumerStatefulWidget {
   const SavesScreen({super.key});
@@ -123,20 +125,27 @@ class _SavesScreenState extends ConsumerState<SavesScreen> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.play_circle_outline, color: AppColors.secondary, size: 28),
-                              onPressed: () async {
+                            BwTapFeedback(
+                              sfx: GameSfx.buttonTap,
+                              onTap: () async {
                                 await ref.read(lifeEngineProvider.notifier).loadSave(save.id);
                                 if (context.mounted) {
                                   context.go('/game');
                                 }
                               },
-                              tooltip: 'Jogar',
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.play_circle_fill, color: AppColors.secondary, size: 30),
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppColors.accentRose, size: 22),
-                              onPressed: () => _deleteSave(save.id),
-                              tooltip: 'Excluir',
+                            const SizedBox(width: 4),
+                            BwTapFeedback(
+                              sfx: GameSfx.buttonTap,
+                              onTap: () => _deleteSave(save.id),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.delete_outline, color: AppColors.accentRose, size: 24),
+                              ),
                             ),
                           ],
                         ),

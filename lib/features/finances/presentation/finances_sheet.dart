@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
+import 'package:bitweve/features/finances/models/investment_model.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
+import 'package:bitweve/features/life_engine/presentation/widgets/lottery_modal.dart';
 import 'package:bitweve/features/properties/models/property_model.dart';
+import 'package:bitweve/features/finances/presentation/crypto_modal.dart';
+import 'package:bitweve/features/properties/presentation/garage_modal.dart';
+import 'package:bitweve/features/businesses/presentation/business_sheet.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class FinancesSheet extends ConsumerWidget {
   const FinancesSheet({super.key});
@@ -38,22 +44,54 @@ class FinancesSheet extends ConsumerWidget {
               ),
             ),
           ),
-          const Text(
-            'Finanças & Patrimônio',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryDark,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Finanças & Patrimônio',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimaryDark,
+                ),
+              ),
+              BwTapFeedback(
+                onTap: () {
+                  Navigator.pop(context);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const LotteryModal(),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withAlpha(35),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.accent.withAlpha(80)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.casino, size: 14, color: AppColors.accent),
+                      SizedBox(width: 4),
+                      Text('Mega-Sena', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accent)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
+
           // Balanço e Patrimônio
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.secondary.withAlpha(40),
+                  AppColors.secondary.withAlpha(45),
                   AppColors.cardDark,
                 ],
               ),
@@ -65,7 +103,7 @@ class FinancesSheet extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Conta Corrente:', style: TextStyle(color: AppColors.textSecondaryDark)),
+                    const Text('Saldo em Conta:', style: TextStyle(color: AppColors.textSecondaryDark)),
                     Text(
                       'R\$ ${char.bankBalance.toStringAsFixed(2)}',
                       style: const TextStyle(
@@ -91,42 +129,162 @@ class FinancesSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
+                if (char.debt > 0) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Dívidas Pendentes:', style: TextStyle(color: AppColors.accentRose)),
+                      Text(
+                        'R\$ ${char.debt.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.accentRose,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Ações de Investimento e Compra
+          const SizedBox(height: 14),
+
+          // Hub Financeiro Especializado (Cripto, Garagem, Empresas, Loteria)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildQuickHubChip(
+                  label: 'Criptomoedas 📈',
+                  icon: Icons.currency_bitcoin,
+                  color: AppColors.secondary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const CryptoModal(),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildQuickHubChip(
+                  label: 'Garagem & Veículos 🏎️',
+                  icon: Icons.directions_car,
+                  color: AppColors.primaryLight,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const GarageModal(),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildQuickHubChip(
+                  label: 'Empresas & Startups 🏢',
+                  icon: Icons.business_center,
+                  color: Colors.amber,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const BusinessSheet(),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildQuickHubChip(
+                  label: 'Mega-Sena 🎰',
+                  icon: Icons.casino,
+                  color: AppColors.accent,
+                  onTap: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const LotteryModal(),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Ações de Investimento, Compra e Pagar Dívida
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                child: BwTapFeedback(
+                  onTap: () => _showBuyPropertyDialog(context, ref),
+                  child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_home, size: 16, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text('Comprar Bens', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ],
+                    ),
                   ),
-                  icon: const Icon(Icons.add_home, size: 18),
-                  label: const Text('Comprar Bens', style: TextStyle(fontSize: 13)),
-                  onPressed: () => _showBuyPropertyDialog(context, ref),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.black,
+                child: BwTapFeedback(
+                  onTap: () => _showInvestDialog(context, ref),
+                  child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.trending_up, size: 16, color: Colors.black),
+                        SizedBox(width: 6),
+                        Text('Investir', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ],
+                    ),
                   ),
-                  icon: const Icon(Icons.trending_up, size: 18),
-                  label: const Text('Investir', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                  onPressed: () => _showInvestDialog(context, ref),
                 ),
               ),
+              if (char.debt > 0) ...[
+                const SizedBox(width: 10),
+                BwTapFeedback(
+                  onTap: () => ref.read(lifeEngineProvider.notifier).payDebt(500),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardDark,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.accentRose),
+                    ),
+                    child: const Icon(Icons.money_off, color: AppColors.accentRose, size: 18),
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 20),
+
           const Text(
-            'Seus Bens e Propriedades',
+            'Bens & Investimentos Ativos',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -134,6 +292,7 @@ class FinancesSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
+
           Expanded(
             child: state.properties.isEmpty && state.investments.isEmpty
                 ? const Center(
@@ -144,15 +303,15 @@ class FinancesSheet extends ConsumerWidget {
                   )
                 : ListView(
                     children: [
-                      ...state.properties.map((p) => _buildPropertyTile(p)),
+                      ...state.properties.map((p) => _buildPropertyTile(context, ref, p)),
                       if (state.investments.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         const Text(
                           'Carteira de Investimentos',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark),
                         ),
                         const SizedBox(height: 8),
-                        ...state.investments.map((inv) => _buildInvestmentTile(inv)),
+                        ...state.investments.map((inv) => _buildInvestmentTile(context, ref, inv)),
                       ],
                     ],
                   ),
@@ -162,7 +321,7 @@ class FinancesSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildPropertyTile(PropertyModel p) {
+  Widget _buildPropertyTile(BuildContext context, WidgetRef ref, PropertyModel p) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -181,10 +340,24 @@ class FinancesSheet extends ConsumerWidget {
               children: [
                 Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark)),
                 Text(
-                  'Valor: R\$ ${p.currentValue.toStringAsFixed(0)} • Custo anual: R\$ ${p.annualCost.toStringAsFixed(0)}',
+                  'Valor: R\$ ${p.currentValue.toStringAsFixed(0)}${p.isFinanced ? " • Dívida: R\$ ${p.remainingDebt.toStringAsFixed(0)}" : ""}',
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
                 ),
               ],
+            ),
+          ),
+          BwTapFeedback(
+            onTap: () {
+              ref.read(lifeEngineProvider.notifier).sellProperty(p.id);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withAlpha(20),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.redAccent.withAlpha(70)),
+              ),
+              child: const Text('Vender', style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -192,7 +365,10 @@ class FinancesSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildInvestmentTile(dynamic inv) {
+  Widget _buildInvestmentTile(BuildContext context, WidgetRef ref, InvestmentModel inv) {
+    final profit = inv.currentValue - inv.investedAmount;
+    final isPositive = profit >= 0;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -202,18 +378,38 @@ class FinancesSheet extends ConsumerWidget {
         border: Border.all(color: AppColors.borderDark, width: 1),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${inv.name} (${inv.ticker})', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark)),
-              Text('Aporte: R\$ ${inv.investedAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark)),
-            ],
+          const Icon(Icons.show_chart, color: AppColors.secondary, size: 26),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(inv.name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark)),
+                Text(
+                  'Atual: R\$ ${inv.currentValue.toStringAsFixed(2)} (${isPositive ? "+" : ""}R\$ ${profit.toStringAsFixed(2)})',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isPositive ? AppColors.statHealth : AppColors.accentRose,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
-          Text(
-            'R\$ ${inv.currentValue.toStringAsFixed(2)}',
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary),
+          BwTapFeedback(
+            onTap: () {
+              ref.read(lifeEngineProvider.notifier).sellInvestment(inv.id);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withAlpha(25),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.secondary.withAlpha(70)),
+              ),
+              child: const Text('Resgatar', style: TextStyle(color: AppColors.secondary, fontSize: 11, fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -221,47 +417,11 @@ class FinancesSheet extends ConsumerWidget {
   }
 
   void _showBuyPropertyDialog(BuildContext context, WidgetRef ref) {
-    final sampleProperties = [
-      PropertyModel(
-        id: 'prop_apt_compact',
-        saveId: '',
-        type: 'apartment',
-        name: 'Apartamento Studio Moderno',
-        purchasePrice: 220000,
-        currentValue: 220000,
-        annualCost: 4000,
-        purchasedAtAge: 0,
-      ),
-      PropertyModel(
-        id: 'prop_house_suburb',
-        saveId: '',
-        type: 'house',
-        name: 'Casa em Bairro Nobre',
-        purchasePrice: 650000,
-        currentValue: 650000,
-        annualCost: 8500,
-        purchasedAtAge: 0,
-      ),
-      PropertyModel(
-        id: 'prop_car_popular',
-        saveId: '',
-        type: 'car',
-        name: 'Hatch Compacto 0km',
-        purchasePrice: 65000,
-        currentValue: 65000,
-        annualCost: 3500,
-        purchasedAtAge: 0,
-      ),
-      PropertyModel(
-        id: 'prop_car_luxury',
-        saveId: '',
-        type: 'car',
-        name: 'Sedan Executivo Alemão',
-        purchasePrice: 280000,
-        currentValue: 280000,
-        annualCost: 12000,
-        purchasedAtAge: 0,
-      ),
+    final properties = [
+      PropertyModel(id: 'car_1', saveId: '', type: 'car', name: 'Carro Popular Usado', purchasePrice: 28000, currentValue: 28000, annualCost: 2200, condition: 80, purchasedAtAge: 0),
+      PropertyModel(id: 'car_2', saveId: '', type: 'car', name: 'Sedan Executivo Premium', purchasePrice: 85000, currentValue: 85000, annualCost: 4500, condition: 95, purchasedAtAge: 0),
+      PropertyModel(id: 'house_1', saveId: '', type: 'real_estate', name: 'Apartamento de 2 Quartos', purchasePrice: 220000, currentValue: 220000, annualCost: 3500, condition: 90, purchasedAtAge: 0),
+      PropertyModel(id: 'house_2', saveId: '', type: 'real_estate', name: 'Casa em Condomínio Fechado', purchasePrice: 650000, currentValue: 650000, annualCost: 7500, condition: 95, purchasedAtAge: 0),
     ];
 
     showModalBottomSheet(
@@ -275,24 +435,47 @@ class FinancesSheet extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Catálogo de Bens e Veículos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark)),
+              const Text('Catálogo de Bens Disponíveis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 12),
-              ...sampleProperties.map((p) {
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(p.isRealEstate ? Icons.home : Icons.directions_car, color: AppColors.primaryLight),
-                  title: Text(p.name, style: const TextStyle(color: AppColors.textPrimaryDark, fontWeight: FontWeight.w600)),
-                  subtitle: Text('R\$ ${p.purchasePrice.toStringAsFixed(0)}', style: const TextStyle(color: AppColors.secondary)),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      backgroundColor: AppColors.primary,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      ref.read(lifeEngineProvider.notifier).buyProperty(p, false);
-                    },
-                    child: const Text('Comprar', style: TextStyle(fontSize: 12)),
+              ...properties.map((p) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardDark,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderDark),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                          Text('R\$ ${p.purchasePrice.toStringAsFixed(0)}', style: const TextStyle(color: AppColors.secondary, fontSize: 13)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              ref.read(lifeEngineProvider.notifier).buyProperty(p, true);
+                            },
+                            child: const Text('Financiar', style: TextStyle(fontSize: 12)),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              ref.read(lifeEngineProvider.notifier).buyProperty(p, false);
+                            },
+                            child: const Text('À Vista', style: TextStyle(fontSize: 12)),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               }),
@@ -304,56 +487,89 @@ class FinancesSheet extends ConsumerWidget {
   }
 
   void _showInvestDialog(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: AppColors.surfaceDark,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+        return AlertDialog(
+          backgroundColor: AppColors.surfaceDark,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Opções de Investimento', style: TextStyle(color: Colors.white, fontSize: 18)),
+          content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Oportunidades de Investimento', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimaryDark)),
-              const SizedBox(height: 12),
               ListTile(
-                title: const Text('Tesouro Renda Fixa (10.5% a.a.)', style: TextStyle(color: AppColors.textPrimaryDark)),
-                subtitle: const Text('Baixo risco, rendimento previsível', style: TextStyle(color: AppColors.textSecondaryDark)),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).invest('fixed_income', 'Tesouro Direto', 'TD10', 5000);
-                  },
-                  child: const Text('Aportar R\$ 5k'),
-                ),
+                tileColor: AppColors.cardDark,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: const Icon(Icons.shield, color: AppColors.statHealth),
+                title: const Text('Tesouro Selic / Renda Fixa', style: TextStyle(color: Colors.white, fontSize: 14)),
+                subtitle: const Text('Rendimentos seguros de 10.75% a.a.', style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 11)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref.read(lifeEngineProvider.notifier).invest('fixed_income', 'Tesouro Direto', 'SELIC', 1000);
+                },
               ),
+              const SizedBox(height: 8),
               ListTile(
-                title: const Text('Ações Tecnológicas', style: TextStyle(color: AppColors.textPrimaryDark)),
-                subtitle: const Text('Alto potencial de valorização', style: TextStyle(color: AppColors.textSecondaryDark)),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).invest('stock', 'Tech Global', 'TECH4', 10000);
-                  },
-                  child: const Text('Aportar R\$ 10k'),
-                ),
+                tileColor: AppColors.cardDark,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: const Icon(Icons.bar_chart, color: AppColors.primaryLight),
+                title: const Text('Ações em Bolsa (IBOVESPA)', style: TextStyle(color: Colors.white, fontSize: 14)),
+                subtitle: const Text('Potencial de valorização e dividendos.', style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 11)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref.read(lifeEngineProvider.notifier).invest('stock', 'Fundo de Ações Brasil', 'BOVA11', 2000);
+                },
               ),
+              const SizedBox(height: 8),
               ListTile(
-                title: const Text('Criptomoedas', style: TextStyle(color: AppColors.textPrimaryDark)),
-                subtitle: const Text('Altíssima volatilidade e risco', style: TextStyle(color: AppColors.textSecondaryDark)),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).invest('crypto', 'Bitcoin', 'BTC', 2500);
-                  },
-                  child: const Text('Aportar R\$ 2.5k'),
-                ),
+                tileColor: AppColors.cardDark,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: const Icon(Icons.currency_bitcoin, color: AppColors.accent),
+                title: const Text('Criptoativos (Bitcoin / Web3)', style: TextStyle(color: Colors.white, fontSize: 14)),
+                subtitle: const Text('Alta volatilidade e grandes retornos.', style: TextStyle(color: AppColors.textSecondaryDark, fontSize: 11)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref.read(lifeEngineProvider.notifier).invest('crypto', 'Bitcoin ETF', 'BTC', 1500);
+                },
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondaryDark)),
+            ),
+          ],
         );
       },
     );
   }
+
+  Widget _buildQuickHubChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return BwTapFeedback(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.cardDark,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withAlpha(80)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
 }
+

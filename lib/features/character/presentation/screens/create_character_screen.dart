@@ -2,10 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/character/models/avatar_config.dart';
 import 'package:bitweve/features/character/presentation/widgets/avatar_widget.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class CreateCharacterScreen extends ConsumerStatefulWidget {
   const CreateCharacterScreen({super.key});
@@ -65,10 +67,13 @@ class _CreateCharacterScreenState extends ConsumerState<CreateCharacterScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.casino, color: AppColors.primaryLight),
-            onPressed: _randomizeName,
-            tooltip: 'Aleatorizar Tudo',
+          BwTapFeedback(
+            sfx: GameSfx.buttonTap,
+            onTap: _randomizeName,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(Icons.casino, color: AppColors.primaryLight, size: 26),
+            ),
           ),
         ],
       ),
@@ -255,29 +260,41 @@ class _CreateCharacterScreenState extends ConsumerState<CreateCharacterScreen> {
                 ],
               ),
               const SizedBox(height: 28),
-              SizedBox(
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              BwTapFeedback(
+                sfx: GameSfx.achievement,
+                onTap: () async {
+                  await ref.read(lifeEngineProvider.notifier).startRandomLife(
+                        countryId: _countryId,
+                        city: _city,
+                        gender: _gender,
+                        firstName: _firstNameController.text.trim(),
+                        lastName: _lastNameController.text.trim(),
+                      );
+                  if (context.mounted) {
+                    context.go('/game');
+                  }
+                },
+                child: Container(
+                  height: 56,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withAlpha(90),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  onPressed: () async {
-                    await ref.read(lifeEngineProvider.notifier).startRandomLife(
-                          countryId: _countryId,
-                          city: _city,
-                          gender: _gender,
-                          firstName: _firstNameController.text.trim(),
-                          lastName: _lastNameController.text.trim(),
-                        );
-                    if (context.mounted) {
-                      context.go('/game');
-                    }
-                  },
                   child: const Text(
                     'Começar Minha Vida no BitWeve 🚀',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

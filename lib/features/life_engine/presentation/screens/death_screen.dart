@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/character/models/avatar_config.dart';
 import 'package:bitweve/features/character/presentation/widgets/avatar_widget.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
 import 'package:bitweve/features/relationships/models/npc_model.dart';
+import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
 class DeathScreen extends ConsumerWidget {
   const DeathScreen({super.key});
@@ -175,16 +177,20 @@ class DeathScreen extends ConsumerWidget {
                           color: AppColors.textSecondaryDark,
                         ),
                       ),
-                      trailing: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        ),
-                        onPressed: () {
+                      trailing: BwTapFeedback(
+                        sfx: GameSfx.achievement,
+                        onTap: () {
                           ref.read(lifeEngineProvider.notifier).continueAsHeir(child.id);
                           context.go('/game');
                         },
-                        child: const Text('Jogar como Herdeiro', style: TextStyle(fontSize: 12)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text('Jogar como Herdeiro', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        ),
                       ),
                     ),
                   );
@@ -192,26 +198,48 @@ class DeathScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
               // Action Buttons
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Iniciar Nova Vida Aleatória'),
-                onPressed: () async {
+              BwTapFeedback(
+                sfx: GameSfx.buttonTap,
+                onTap: () async {
                   await ref.read(lifeEngineProvider.notifier).startRandomLife();
                   if (context.mounted) context.go('/game');
                 },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF6C5CE7), Color(0xFF00F2FE)]),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.refresh, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Iniciar Nova Vida Aleatória', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              BwTapFeedback(
+                sfx: GameSfx.buttonTap,
+                onTap: () => context.go('/main_menu'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardDark,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderDark),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.home, color: AppColors.textSecondaryDark),
+                      SizedBox(width: 8),
+                      Text('Voltar ao Menu Principal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                    ],
+                  ),
                 ),
-                icon: const Icon(Icons.home),
-                label: const Text('Voltar ao Menu Principal'),
-                onPressed: () => context.go('/main_menu'),
               ),
             ],
           ),
