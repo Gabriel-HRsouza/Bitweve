@@ -1,0 +1,370 @@
+[
+  {
+    "id": "child_drawing",
+    "category": "childhood",
+    "minAge": 3,
+    "maxAge": 6,
+    "title": "Arte na Parede",
+    "description": "Você encontrou uma caixa de giz de cera novinha e uma parede branca tentadora na sala.",
+    "choices": [
+      {
+        "label": "Desenhar um dinossauro gigante na parede",
+        "healthDelta": 0,
+        "happinessDelta": 15,
+        "smartsDelta": 5,
+        "looksDelta": 0,
+        "karmaDelta": -5,
+        "stressDelta": 0,
+        "reputationDelta": -5,
+        "moneyDelta": 0,
+        "resultText": "Seus pais ficaram chocados, mas admiraram seu talento artístico primitivo!"
+      },
+      {
+        "label": "Desenhar educadamente em uma folha de papel",
+        "healthDelta": 0,
+        "happinessDelta": 5,
+        "smartsDelta": 10,
+        "looksDelta": 0,
+        "karmaDelta": 10,
+        "stressDelta": -5,
+        "reputationDelta": 10,
+        "moneyDelta": 0,
+        "resultText": "Seus pais colocaram seu desenho na porta da geladeira com muito orgulho."
+      },
+      {
+        "label": "Comer um pedaço de giz de cera verde",
+        "healthDelta": -10,
+        "happinessDelta": -10,
+        "smartsDelta": -5,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 15,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "Tinha gosto de sabão. Você vomitou no tapete e foi levado correndo ao pediatra."
+      }
+    ]
+  },
+  {
+    "id": "school_bully",
+    "category": "school",
+    "minAge": 7,
+    "maxAge": 14,
+    "title": "O Valentão do Recreio",
+    "description": "Um colega mais velho empurrou você na fila da cantina e exigiu seu lanche.",
+    "choices": [
+      {
+        "label": "Enfrentar ele e defender seu lanche",
+        "healthDelta": -5,
+        "happinessDelta": 10,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 5,
+        "stressDelta": 10,
+        "reputationDelta": 20,
+        "moneyDelta": 0,
+        "resultText": "Você levou um arranhão, mas acertou um chute nele! Ele nunca mais mexeu com você e a turma te aplaudiu."
+      },
+      {
+        "label": "Contar discretamente para a diretoria",
+        "healthDelta": 0,
+        "happinessDelta": 0,
+        "smartsDelta": 10,
+        "looksDelta": 0,
+        "karmaDelta": 10,
+        "stressDelta": -5,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "A direção suspendeu o valentão e seus pais elogiaram sua maturidade."
+      },
+      {
+        "label": "Entregar o lanche e chorar baixinho",
+        "healthDelta": 0,
+        "happinessDelta": -20,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 20,
+        "reputationDelta": -10,
+        "moneyDelta": 0,
+        "resultText": "Você passou a tarde com fome e sentindo-se humilhado."
+      }
+    ]
+  },
+  {
+    "id": "school_exam",
+    "category": "school",
+    "minAge": 10,
+    "maxAge": 17,
+    "title": "A Prova Decisiva",
+    "description": "Amanhã é a prova bimestral mais difícil do ano. Seus amigos estão chamando para jogar videogame.",
+    "choices": [
+      {
+        "label": "Passar a noite inteira estudando",
+        "healthDelta": -5,
+        "happinessDelta": -5,
+        "smartsDelta": 20,
+        "looksDelta": 0,
+        "karmaDelta": 5,
+        "stressDelta": 15,
+        "reputationDelta": 10,
+        "moneyDelta": 0,
+        "resultText": "Você tirou nota máxima e foi o primeiro colocado da sala!"
+      },
+      {
+        "label": "Jogar videogame a noite toda com a galera",
+        "healthDelta": 0,
+        "happinessDelta": 25,
+        "smartsDelta": -10,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": -10,
+        "reputationDelta": 5,
+        "moneyDelta": 0,
+        "resultText": "Foi incrivelmente divertido, mas no dia seguinte você chutou todas as questões e tirou nota vermelha."
+      },
+      {
+        "label": "Preparar uma cola minúscula na borracha",
+        "healthDelta": 0,
+        "happinessDelta": 0,
+        "smartsDelta": 5,
+        "looksDelta": 0,
+        "karmaDelta": -15,
+        "stressDelta": 20,
+        "reputationDelta": -15,
+        "moneyDelta": 0,
+        "resultText": "O professor pegou sua cola no meio do teste. Você foi para a coordenação e zerou a prova!"
+      }
+    ]
+  },
+  {
+    "id": "teen_crush",
+    "category": "romance",
+    "minAge": 14,
+    "maxAge": 19,
+    "title": "Declaração Apaixonada",
+    "description": "Você tem uma paixão secreta por uma pessoa da sua turma há meses. O que você faz?",
+    "choices": [
+      {
+        "label": "Se declarar pessoalmente com uma carta sincera",
+        "healthDelta": 0,
+        "happinessDelta": 25,
+        "smartsDelta": 5,
+        "looksDelta": 5,
+        "karmaDelta": 10,
+        "stressDelta": -10,
+        "reputationDelta": 10,
+        "moneyDelta": 0,
+        "resultText": "A pessoa sorriu emocionada e disse que também gostava de você! Vocês deram o primeiro beijo."
+      },
+      {
+        "label": "Pedir para um amigo intermediar",
+        "healthDelta": 0,
+        "happinessDelta": 5,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 5,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "A pessoa achou você meio tímido, mas achou fofo."
+      },
+      {
+        "label": "Guardar o segredo para sempre por medo",
+        "healthDelta": 0,
+        "happinessDelta": -15,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 10,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "Meses depois, você descobriu que a pessoa começou a namorar outro colega."
+      }
+    ]
+  },
+  {
+    "id": "adult_startup",
+    "category": "career",
+    "minAge": 20,
+    "maxAge": 55,
+    "title": "A Proposta da Startup",
+    "description": "Um antigo colega te convida para ser cofundador de uma startup de inteligência artificial promissora.",
+    "choices": [
+      {
+        "label": "Aceitar o convite e investir R$ 10.000",
+        "healthDelta": 0,
+        "happinessDelta": 20,
+        "smartsDelta": 15,
+        "looksDelta": 0,
+        "karmaDelta": 5,
+        "stressDelta": 20,
+        "reputationDelta": 25,
+        "moneyDelta": -10000,
+        "resultText": "A startup decolou e você se tornou sócio de um negócio revolucionário!"
+      },
+      {
+        "label": "Apoiar como consultor com salário fixo",
+        "healthDelta": 0,
+        "happinessDelta": 10,
+        "smartsDelta": 10,
+        "looksDelta": 0,
+        "karmaDelta": 5,
+        "stressDelta": 5,
+        "reputationDelta": 10,
+        "moneyDelta": 5000,
+        "resultText": "Você prestou boas consultorias e ganhou uma renda extra sem correr riscos."
+      },
+      {
+        "label": "Recusar educadamente para manter a rotina tranquila",
+        "healthDelta": 5,
+        "happinessDelta": 0,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": -10,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "Você preferiu a estabilidade e evitou o estresse das noites sem dormir."
+      }
+    ]
+  },
+  {
+    "id": "found_wallet",
+    "category": "ethics",
+    "minAge": 12,
+    "maxAge": 80,
+    "title": "A Carteira Perdida",
+    "description": "Ao caminhar pela calçada, você encontra uma carteira de couro recheada com notas de dinheiro e cartões de um desconhecido.",
+    "choices": [
+      {
+        "label": "Procurar os documentos e devolver tudo intacto",
+        "healthDelta": 0,
+        "happinessDelta": 20,
+        "smartsDelta": 5,
+        "looksDelta": 0,
+        "karmaDelta": 30,
+        "stressDelta": -10,
+        "reputationDelta": 25,
+        "moneyDelta": 200,
+        "resultText": "O dono chorou de alívio e insistiu em te dar uma recompensa de gratidão!"
+      },
+      {
+        "label": "Pegar o dinheiro e jogar os documentos na lixeira",
+        "healthDelta": 0,
+        "happinessDelta": -5,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": -35,
+        "stressDelta": 15,
+        "reputationDelta": -15,
+        "moneyDelta": 800,
+        "resultText": "Você embolsou o dinheiro com o coração acelerado e uma culpa pesada no peito."
+      },
+      {
+        "label": "Entregar imediatamente a um posto policial",
+        "healthDelta": 0,
+        "happinessDelta": 10,
+        "smartsDelta": 5,
+        "looksDelta": 0,
+        "karmaDelta": 20,
+        "stressDelta": 0,
+        "reputationDelta": 15,
+        "moneyDelta": 0,
+        "resultText": "O policial anotou seus dados e registrou a ocorrência com elogios à sua postura."
+      }
+    ]
+  },
+  {
+    "id": "lottery_ticket",
+    "category": "luck",
+    "minAge": 18,
+    "maxAge": 90,
+    "title": "Bilhete da Loteria",
+    "description": "Você passou em frente a uma casa lotérica e o prêmio acumulado está em destaque na vitrine.",
+    "choices": [
+      {
+        "label": "Comprar um bilhete da sorte (R$ 50)",
+        "healthDelta": 0,
+        "happinessDelta": 15,
+        "smartsDelta": 0,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 0,
+        "reputationDelta": 0,
+        "moneyDelta": -50,
+        "resultText": "Você conferiu os números... e acertou a quadra! Ganhou R$ 3.500!"
+      },
+      {
+        "label": "Comprar um bolão de alta aposta (R$ 500)",
+        "healthDelta": 0,
+        "happinessDelta": -10,
+        "smartsDelta": -5,
+        "looksDelta": 0,
+        "karmaDelta": 0,
+        "stressDelta": 10,
+        "reputationDelta": 0,
+        "moneyDelta": -500,
+        "resultText": "Não acertou nenhum número. Dinheiro jogado no ralo."
+      },
+      {
+        "label": "Ignorar e guardar o dinheiro na poupança",
+        "healthDelta": 0,
+        "happinessDelta": 0,
+        "smartsDelta": 10,
+        "looksDelta": 0,
+        "karmaDelta": 5,
+        "stressDelta": -5,
+        "reputationDelta": 0,
+        "moneyDelta": 0,
+        "resultText": "Você manteve a disciplina financeira e seguiu seu caminho com serenidade."
+      }
+    ]
+  },
+  {
+    "id": "health_gym",
+    "category": "health",
+    "minAge": 16,
+    "maxAge": 70,
+    "title": "Decisão Fitness",
+    "description": "Você olha no espelho e percebe que sua disposição física não está no melhor momento.",
+    "choices": [
+      {
+        "label": "Contratar personal trainer e treinar pesado todo dia",
+        "healthDelta": 25,
+        "happinessDelta": 15,
+        "smartsDelta": 0,
+        "looksDelta": 20,
+        "karmaDelta": 5,
+        "stressDelta": -15,
+        "reputationDelta": 10,
+        "moneyDelta": -2400,
+        "resultText": "Seu corpo se transformou! Você ganhou massa magra, disposição e autoestima nas alturas."
+      },
+      {
+        "label": "Fazer caminhadas e corridas ao ar livre no parque",
+        "healthDelta": 15,
+        "happinessDelta": 15,
+        "smartsDelta": 5,
+        "looksDelta": 10,
+        "karmaDelta": 5,
+        "stressDelta": -20,
+        "reputationDelta": 5,
+        "moneyDelta": 0,
+        "resultText": "O ar puro e o exercício regular fizeram maravilhas para sua saúde mental e física."
+      },
+      {
+        "label": "Comprar pizzas e maratonar séries no sofá",
+        "healthDelta": -15,
+        "happinessDelta": 15,
+        "smartsDelta": 0,
+        "looksDelta": -10,
+        "karmaDelta": 0,
+        "stressDelta": 5,
+        "reputationDelta": 0,
+        "moneyDelta": -300,
+        "resultText": "Foi confortável na hora, mas nos dias seguintes você se sentiu pesado e cansado."
+      }
+    ]
+  }
+]

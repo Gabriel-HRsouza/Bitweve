@@ -1,0 +1,110 @@
+[
+  {
+    "id": "br",
+    "name": "Brasil",
+    "currency": "BRL",
+    "currencySymbol": "R$",
+    "flag": "🇧🇷",
+    "avgSalaryMultiplier": 1.0,
+    "costOfLivingMultiplier": 1.0,
+    "taxRate": 0.18,
+    "lifeExpectancy": 80,
+    "cities": ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Brasília", "Salvador", "Porto Alegre", "Florianópolis", "Fortaleza", "Recife"]
+  },
+  {
+    "id": "us",
+    "name": "Estados Unidos",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "flag": "🇺🇸",
+    "avgSalaryMultiplier": 4.5,
+    "costOfLivingMultiplier": 4.0,
+    "taxRate": 0.24,
+    "lifeExpectancy": 82,
+    "cities": ["Nova York", "Los Angeles", "Chicago", "Miami", "São Francisco", "Austin", "Seattle", "Boston"]
+  },
+  {
+    "id": "ca",
+    "name": "Canadá",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "flag": "🇨🇦",
+    "avgSalaryMultiplier": 4.0,
+    "costOfLivingMultiplier": 3.7,
+    "taxRate": 0.26,
+    "lifeExpectancy": 84,
+    "cities": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Quebec"]
+  },
+  {
+    "id": "pt",
+    "name": "Portugal",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "flag": "🇵🇹",
+    "avgSalaryMultiplier": 2.2,
+    "costOfLivingMultiplier": 2.0,
+    "taxRate": 0.22,
+    "lifeExpectancy": 83,
+    "cities": ["Lisboa", "Porto", "Coimbra", "Braga", "Faro", "Aveiro"]
+  },
+  {
+    "id": "jp",
+    "name": "Japão",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "flag": "🇯🇵",
+    "avgSalaryMultiplier": 3.8,
+    "costOfLivingMultiplier": 3.5,
+    "taxRate": 0.25,
+    "lifeExpectancy": 86,
+    "cities": ["Tóquio", "Osaka", "Quioto", "Yokohama", "Nagoya", "Fukuoka"]
+  },
+  {
+    "id": "de",
+    "name": "Alemanha",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "flag": "🇩🇪",
+    "avgSalaryMultiplier": 4.2,
+    "costOfLivingMultiplier": 3.6,
+    "taxRate": 0.32,
+    "lifeExpectancy": 84,
+    "cities": ["Berlim", "Munique", "Hamburgo", "Frankfurt", "Colônia"]
+  },
+  {
+    "id": "uk",
+    "name": "Reino Unido",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "flag": "🇬🇧",
+    "avgSalaryMultiplier": 4.3,
+    "costOfLivingMultiplier": 3.9,
+    "taxRate": 0.28,
+    "lifeExpectancy": 83,
+    "cities": ["Londres", "Manchester", "Edimburgo", "Birmingham", "Bristol"]
+  },
+  {
+    "id": "fr",
+    "name": "França",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "flag": "🇫🇷",
+    "avgSalaryMultiplier": 4.0,
+    "costOfLivingMultiplier": 3.7,
+    "taxRate": 0.30,
+    "lifeExpectancy": 84,
+    "cities": ["Paris", "Lyon", "Marselha", "Toulouse", "Nice", "Bordeaux"]
+  },
+  {
+    "id": "au",
+    "name": "Austrália",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "flag": "🇦🇺",
+    "avgSalaryMultiplier": 4.4,
+    "costOfLivingMultiplier": 3.8,
+    "taxRate": 0.27,
+    "lifeExpectancy": 85,
+    "cities": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"]
+  }
+]

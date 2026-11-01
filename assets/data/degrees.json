@@ -1,0 +1,101 @@
+[
+  {
+    "id": "cs",
+    "name": "Ciência da Computação",
+    "years": 4,
+    "annualCost": 18000,
+    "minSmarts": 50,
+    "difficulty": 70,
+    "careerField": "Tecnologia"
+  },
+  {
+    "id": "med",
+    "name": "Medicina",
+    "years": 6,
+    "annualCost": 60000,
+    "minSmarts": 75,
+    "difficulty": 90,
+    "careerField": "Medicina"
+  },
+  {
+    "id": "nursing",
+    "name": "Enfermagem",
+    "years": 4,
+    "annualCost": 16000,
+    "minSmarts": 45,
+    "difficulty": 60,
+    "careerField": "Medicina"
+  },
+  {
+    "id": "law",
+    "name": "Direito",
+    "years": 5,
+    "annualCost": 22000,
+    "minSmarts": 55,
+    "difficulty": 65,
+    "careerField": "Direito"
+  },
+  {
+    "id": "eng_civil",
+    "name": "Engenharia Civil",
+    "years": 5,
+    "annualCost": 25000,
+    "minSmarts": 65,
+    "difficulty": 75,
+    "careerField": "Engenharia"
+  },
+  {
+    "id": "business",
+    "name": "Administração de Empresas",
+    "years": 4,
+    "annualCost": 15000,
+    "minSmarts": 40,
+    "difficulty": 50,
+    "careerField": "Finanças"
+  },
+  {
+    "id": "economics",
+    "name": "Economia",
+    "years": 4,
+    "annualCost": 20000,
+    "minSmarts": 60,
+    "difficulty": 65,
+    "careerField": "Finanças"
+  },
+  {
+    "id": "pedagogy",
+    "name": "Pedagogia",
+    "years": 4,
+    "annualCost": 12000,
+    "minSmarts": 35,
+    "difficulty": 45,
+    "careerField": "Educação"
+  },
+  {
+    "id": "arts",
+    "name": "Artes Cênicas",
+    "years": 4,
+    "annualCost": 14000,
+    "minSmarts": 30,
+    "difficulty": 50,
+    "careerField": "Fama e Mídia"
+  },
+  {
+    "id": "aviation",
+    "name": "Ciências Aeronáuticas",
+    "years": 4,
+    "annualCost": 45000,
+    "minSmarts": 65,
+    "difficulty": 80,
+    "careerField": "Aviação"
+  },
+  {
+    "id": "gastronomy",
+    "name": "Gastronomia",
+    "years": 2,
+    "annualCost": 16000,
+    "minSmarts": 35,
+    "difficulty": 55,
+    "careerField": "Gastronomia"
+  }
+]
