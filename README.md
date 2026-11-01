@@ -11,11 +11,10 @@ Todos os recursos do jogo são totalmente gratuitos e desbloqueados, sem moedas 
 ### No Android
 
 #### Método 1: Instalação Direta via APK (Recomendado)
-1. Acesse a aba **Releases** deste repositório no GitHub: [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases).
-2. Baixe o arquivo mais recente: `app-release.apk` (ou `BitWeve.apk`).
-3. No seu celular Android, abra o arquivo baixado.
-4. Se o sistema solicitar, autorize a instalação de aplicativos de fontes desconhecidas para o navegador ou gerenciador de arquivos.
-5. Toque em **Instalar** e abra o jogo quando o processo for concluído.
+1. Baixe o instalador oficial diretamente: [Baixar BitWeve v1.0.0 (APK)](https://github.com/Gabriel-HRsouza/Bitweve/releases/download/v1.0.0/BitWeve-v1.0.0.apk) ou acesse a página de [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases).
+2. No seu celular Android, abra o arquivo baixado (`BitWeve-v1.0.0.apk`).
+3. Se o sistema solicitar, autorize a instalação de aplicativos de fontes desconhecidas para o navegador ou gerenciador de arquivos.
+4. Toque em **Instalar** e abra o jogo quando o processo for concluído.
 
 *Observação para desenvolvedores:* Caso você clone o código e compile manualmente, o instalador gerado ficará em:
 `build/app/outputs/flutter-apk/app-release.apk`
