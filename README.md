@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <b>Simulador de vida profundo, 100% interativo, visualmente profissional e offline para Android e iOS.</b><br/>
+  <b>Simulador de vida profundo, 100% interativo e offline para Android e iOS.</b><br/>
   Desenvolvido em Flutter e Dart com persistência local em SQLite nativo (Drift).
 </p>
 
