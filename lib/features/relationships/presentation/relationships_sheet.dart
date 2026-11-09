@@ -1,343 +1,242 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bitweve/core/theme/app_colors.dart';
+
+import 'package:bitweve/core/theme/app_theme.dart';
+import 'package:bitweve/core/theme/game_palette.dart';
+import 'package:bitweve/core/utils/format.dart';
+import 'package:bitweve/features/character/models/avatar_config.dart';
 import 'package:bitweve/features/character/presentation/widgets/avatar_widget.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
 import 'package:bitweve/features/relationships/models/npc_model.dart';
-import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
+import 'package:bitweve/features/relationships/presentation/person_profile_sheet.dart';
+import 'package:bitweve/features/dating/presentation/dating_app_sheet.dart';
+import 'package:bitweve/shared/ui/game_ui.dart';
 
-class RelationshipsSheet extends ConsumerWidget {
-  const RelationshipsSheet({super.key});
+Color relationColor(NpcModel n) {
+  if (!n.isAlive) return const Color(0xFF64748B);
+  if (n.isRomantic) return GamePalette.pink;
+  if (n.relationshipType == RelationshipType.rival) return GamePalette.red;
+  if (n.isFamily) return const Color(0xFFFB7185);
+  if (n.isWork) return GamePalette.blue;
+  return GamePalette.orange;
+}
+
+class RelationshipsSheet extends ConsumerStatefulWidget {
+  final int initialTab;
+  const RelationshipsSheet({super.key, this.initialTab = 0});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final stateAsync = ref.watch(lifeEngineProvider);
-    final state = stateAsync.value;
+  ConsumerState<RelationshipsSheet> createState() => _RelationshipsSheetState();
+}
 
-    if (state == null) {
-      return const SizedBox.shrink();
-    }
+class _RelationshipsSheetState extends ConsumerState<RelationshipsSheet> with SingleTickerProviderStateMixin {
+  late final TabController _tab = TabController(length: 5, vsync: this, initialIndex: widget.initialTab.clamp(0, 4));
 
-    final npcs = state.npcs;
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  @override
+  Widget build(BuildContext context) {
+    final s = ref.watch(lifeEngineProvider).value;
+    if (s == null) return const SizedBox.shrink();
+    final family = s.npcs.where((n) => n.isFamily && !n.isRomantic || n.relationshipType == RelationshipType.spouse).toList()
+      ..sort((a, b) => (b.isAlive ? 1 : 0).compareTo(a.isAlive ? 1 : 0));
+    final social = s.npcs.where((n) => n.isSocial && n.relationshipType != RelationshipType.exPartner).toList();
+    final love = s.npcs.where((n) => n.isRomantic || n.relationshipType == RelationshipType.exPartner).toList();
+    final work = s.npcs.where((n) => n.isWork).toList();
+    final age = s.character.currentAge;
+
+    return GameSheet(
+      title: 'Relacionamentos',
+      subtitle: '${s.npcs.where((n) => n.isAlive).length} pessoas na sua vida',
+      icon: Icons.favorite_rounded,
+      color: GamePalette.pink,
+      header: TabBar(
+        controller: _tab,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        tabs: const [
+          Tab(icon: Icon(Icons.family_restroom_rounded, size: 18), text: 'Família', height: 52),
+          Tab(icon: Icon(Icons.groups_rounded, size: 18), text: 'Social', height: 52),
+          Tab(icon: Icon(Icons.favorite_rounded, size: 18), text: 'Amor', height: 52),
+          Tab(icon: Icon(Icons.work_rounded, size: 18), text: 'Trabalho', height: 52),
+          Tab(icon: Icon(Icons.account_tree_rounded, size: 18), text: 'Legado', height: 52),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: TabBarView(
+        controller: _tab,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: AppColors.borderDark,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Relacionamentos',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryDark,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(40),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${npcs.where((n) => n.isAlive).length} Pessoas Vivas',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryLight,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: npcs.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Nenhum relacionamento no momento.',
-                      style: TextStyle(color: AppColors.textSecondaryDark),
+          _list(family, empty: 'Sua família aparece aqui.'),
+          _list(social,
+              header: age >= 6
+                  ? GameButton(
+                      label: 'Sair para conhecer pessoas',
+                      caption: '−10 energia · pode surgir uma nova amizade',
+                      icon: Icons.nightlife_rounded,
+                      colors: const [GamePalette.orange, GamePalette.pink],
+                      onTap: () => ref.read(lifeEngineProvider.notifier).act((svc, st) => svc.meetPeople(st)),
+                    )
+                  : null,
+              empty: 'Faça amigos na escola, no trabalho ou saindo.'),
+          _list(love,
+              header: age >= 16
+                  ? Column(children: [
+                      if (age >= 18) ...[
+                        GameButton(
+                          label: 'Abrir o app Faísca',
+                          caption: 'App de namoro · perfis, matches e encontros',
+                          icon: Icons.local_fire_department_rounded,
+                          colors: const [Color(0xFFFF5A5F), Color(0xFFFF4F9A)],
+                          onTap: () => showGameSheet(context, const DatingAppSheet()),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      GameButton(
+                      label: 'Procurar um amor',
+                      caption: 'App de encontros · −10 energia',
+                      icon: Icons.favorite_border_rounded,
+                      colors: const [GamePalette.pink, Color(0xFFA855F7)],
+                      onTap: () => ref.read(lifeEngineProvider.notifier).act((svc, st) => svc.findLove(st)),
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: npcs.length,
-                    itemBuilder: (context, index) {
-                      final npc = npcs[index];
-                      return _buildNpcTile(context, ref, npc);
-                    },
-                  ),
-          ),
+                    ])
+                  : null,
+              empty: age < 14 ? 'O amor pode esperar. Aproveite a infância!' : 'Paqueras, namoros e casamento aparecem aqui.'),
+          _list(work, empty: 'Colegas e chefes aparecem quando você tem um emprego.'),
+          _legacy(s),
         ],
       ),
     );
   }
 
-  Widget _buildNpcTile(BuildContext context, WidgetRef ref, NpcModel npc) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderDark, width: 1),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        leading: AvatarWidget(config: npc.avatarConfig, size: 48),
-        title: Text(
-          npc.fullName,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: npc.isAlive ? AppColors.textPrimaryDark : AppColors.textMutedDark,
-            decoration: npc.isAlive ? null : TextDecoration.lineThrough,
+  Widget _list(List<NpcModel> people, {Widget? header, required String empty}) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      children: [
+        if (header != null) ...[header, const SizedBox(height: 12)],
+        if (people.isEmpty) EmptyState(icon: Icons.person_search_rounded, title: 'Ninguém por aqui', message: empty, color: GamePalette.pink),
+        for (var i = 0; i < people.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: PersonTile(npc: people[i], index: i),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 2),
-            Text(
-              '${npc.relationLabel} • ${npc.age} anos • ${npc.occupation}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryDark),
-            ),
-            const SizedBox(height: 6),
-            if (npc.isAlive)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: npc.relationshipLevel / 100.0,
-                  minHeight: 6,
-                  backgroundColor: Colors.white.withAlpha(20),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    npc.relationshipLevel > 60
-                        ? AppColors.statHealth
-                        : (npc.relationshipLevel > 30 ? AppColors.accent : AppColors.accentRose),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        trailing: npc.isAlive
-            ? const Icon(Icons.chevron_right, color: AppColors.textSecondaryDark)
-            : const Icon(Icons.circle, size: 10, color: Colors.grey),
-        onTap: npc.isAlive ? () => _showNpcActions(context, ref, npc) : null,
-      ),
+      ],
     );
   }
 
-  void _showNpcActions(BuildContext context, WidgetRef ref, NpcModel npc) {
-    final state = ref.read(lifeEngineProvider).value;
-    final charAge = state?.character.currentAge ?? 0;
-    final isPartner = npc.relationshipType == RelationshipType.partner;
-    final isSpouse = npc.relationshipType == RelationshipType.spouse;
-    final inRelationship = isPartner || isSpouse;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    AvatarWidget(config: npc.avatarConfig, size: 54),
-                    const SizedBox(width: 16),
+  Widget _legacy(LifeEngineState s) {
+    final p = context.gp;
+    final x = s.extras;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      children: [
+        SectionTitle('Pets', icon: Icons.pets_rounded, trailing: s.character.currentAge >= 6
+            ? TextButton.icon(onPressed: () => _adopt(context), icon: const Icon(Icons.add_rounded), label: const Text('Adotar'))
+            : null),
+        if (x.pets.isEmpty)
+          Text('Nenhum pet ainda. Adoção custa R\$ 150.', style: TextStyle(color: p.textMuted))
+        else
+          ...x.pets.map((pet) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GameCard(
+                  accent: pet.alive ? GamePalette.gold : null,
+                  padding: const EdgeInsets.all(12),
+                  child: Row(children: [
+                    IconBadge(icon: Icons.pets_rounded, color: pet.alive ? GamePalette.gold : const Color(0xFF64748B), size: 44),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            npc.fullName,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryDark,
-                            ),
-                          ),
-                          Text(
-                            '${npc.relationLabel} • Afinidade: ${npc.relationshipLevel}%',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.primaryLight,
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(pet.name, style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15)),
+                        Text('${pet.type} · ${pet.age} anos${pet.alive ? '' : ' · falecido'}', style: TextStyle(color: p.textMuted, fontSize: 12)),
+                        if (pet.alive) ...[const SizedBox(height: 6), StatMeter(label: 'Vínculo', value: pet.bond, icon: Icons.favorite_rounded, compact: true)],
+                      ]),
                     ),
-                  ],
+                    if (pet.alive)
+                      IconButton(
+                        tooltip: 'Brincar',
+                        onPressed: () => ref.read(lifeEngineProvider.notifier).act((svc, st) => svc.playWithPet(st, pet.id)),
+                        icon: const Icon(Icons.sports_baseball_rounded, color: GamePalette.gold),
+                      ),
+                  ]),
                 ),
-                const SizedBox(height: 20),
-
-                _actionButton(
-                  icon: Icons.chat_bubble_outline,
-                  label: 'Conversar Amigavelmente',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'talk');
-                  },
+              )),
+        SectionTitle('Árvore da dinastia', subtitle: 'Geração ${s.generation}', icon: Icons.account_tree_rounded),
+        if (x.ancestors.isEmpty)
+          Text('Você é a primeira geração. Tenha filhos para continuar a história depois da morte.', style: TextStyle(color: p.textMuted))
+        else
+          ...x.ancestors.reversed.map((a) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GameCard(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(children: [
+                    AvatarWidget(config: AvatarConfig.fromJson(a.avatarJson), age: a.ageOfDeath, size: 52, deceased: true),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(a.name, style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
+                        Text('Geração ${a.generation} · ${a.birthYear}–${a.birthYear + a.ageOfDeath} · ${a.job ?? 'sem profissão registrada'}',
+                            style: TextStyle(color: p.textMuted, fontSize: 12)),
+                      ]),
+                    ),
+                    Text(Fmt.compactMoney(a.netWorth), style: const TextStyle(color: GamePalette.gold, fontWeight: FontWeight.w800)),
+                  ]),
                 ),
-                _actionButton(
-                  icon: Icons.thumb_up_alt_outlined,
-                  label: 'Elogiar com Carinho',
-                  color: AppColors.secondary,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'compliment');
-                  },
-                ),
-                _actionButton(
-                  icon: Icons.card_giftcard,
-                  label: 'Dar Presente Especial (R\$ 150)',
-                  color: AppColors.accent,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'gift');
-                  },
-                ),
-                _actionButton(
-                  icon: Icons.diversity_1,
-                  label: 'Fortalecer Vínculo / Passear (R\$ 200)',
-                  color: const Color(0xFF00F2FE),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'strengthenBond');
-                  },
-                ),
-                _actionButton(
-                  icon: Icons.handshake_outlined,
-                  label: 'Pedir Desculpas / Fazer as Pazes',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'apologize');
-                  },
-                ),
-                _actionButton(
-                  icon: Icons.flash_on,
-                  label: 'Discutir / Brigar',
-                  color: AppColors.accentRose,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'argue');
-                  },
-                ),
-
-                // Romance / Família
-                if (!inRelationship && charAge >= 14 && (npc.relationshipType == RelationshipType.friend || npc.relationshipType == RelationshipType.coworker))
-                  _actionButton(
-                    icon: Icons.favorite_border,
-                    label: 'Pedir em Namoro ❤️',
-                    color: const Color(0xFFEC4899),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'startDating');
-                    },
-                  ),
-
-                if (isPartner && charAge >= 18)
-                  _actionButton(
-                    icon: Icons.favorite,
-                    label: 'Pedir em Casamento 💍',
-                    color: const Color(0xFFEC4899),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'marry');
-                    },
-                  ),
-
-                if (inRelationship && charAge >= 18)
-                  _actionButton(
-                    icon: Icons.child_friendly,
-                    label: 'Planejar Ter um Filho(a) 👶',
-                    color: AppColors.statHealth,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'haveBaby');
-                    },
-                  ),
-
-                if (inRelationship)
-                  _actionButton(
-                    icon: Icons.heart_broken,
-                    label: 'Terminar Relacionamento',
-                    color: Colors.redAccent,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      ref.read(lifeEngineProvider.notifier).interactNpc(npc.id, 'breakUp');
-                    },
-                  ),
-              ],
+              )),
+        GameCard(
+          accent: GamePalette.violet,
+          padding: const EdgeInsets.all(12),
+          child: Row(children: [
+            AvatarWidget(config: s.character.avatarConfig, age: s.character.currentAge, size: 52, ringColor: GamePalette.violet),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('${s.character.fullName} (você) · Geração ${s.generation}',
+                  style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
             ),
-          ),
-        );
-      },
+          ]),
+        ),
+      ],
     );
   }
 
-  Widget _actionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: BwTapFeedback(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color?.withAlpha(80) ?? AppColors.borderDark, width: 1),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: color ?? AppColors.primaryLight, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: color ?? AppColors.textPrimaryDark,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right, size: 16, color: AppColors.textSecondaryDark),
-            ],
-          ),
-        ),
-      ),
+  Future<void> _adopt(BuildContext context) async {
+    final name = TextEditingController(text: 'Pipoca');
+    var type = 'Cachorro';
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setLocal) {
+        final p = ctx.gp;
+        return AlertDialog(
+          title: Text('Adotar um pet', style: AppTheme.display(20, color: p.text)),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            Wrap(spacing: 8, children: [
+              for (final t in const ['Cachorro', 'Gato', 'Coelho', 'Papagaio'])
+                ChoiceChip(label: Text(t), selected: type == t, onSelected: (_) => setLocal(() => type = t)),
+            ]),
+            const SizedBox(height: 12),
+            TextField(controller: name, decoration: const InputDecoration(labelText: 'Nome do pet')),
+            const SizedBox(height: 8),
+            Text('Taxa de adoção: R\$ 150', style: TextStyle(color: p.textMuted, fontSize: 12)),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Adotar')),
+          ],
+        );
+      }),
     );
+    if (ok == true && name.text.trim().isNotEmpty) {
+      await ref.read(lifeEngineProvider.notifier).adoptPet(type, name.text.trim());
+    }
   }
+}
+
+/// Compatibilidade: a ficha detalhada agora é a [PersonProfileSheet].
+class NpcDetailSheet extends StatelessWidget {
+  final String npcId;
+  const NpcDetailSheet({super.key, required this.npcId});
+
+  @override
+  Widget build(BuildContext context) => PersonProfileSheet(npcId: npcId);
 }

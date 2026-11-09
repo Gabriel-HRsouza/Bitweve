@@ -96,6 +96,8 @@ class CharacterModel {
   });
 
   String get fullName => '$firstName $lastName';
+  bool get hasJob => currentJobTitle != null;
+  int get year => birthYear + currentAge;
 
   CharacterModel copyWith({
     String? id,
@@ -140,6 +142,9 @@ class CharacterModel {
     bool? hasDriversLicense,
     bool? criminalRecord,
     int? timesArrested,
+    bool clearJob = false,
+    bool clearPartner = false,
+    bool clearDegree = false,
   }) {
     return CharacterModel(
       id: id ?? this.id,
@@ -172,13 +177,13 @@ class CharacterModel {
       isAlive: isAlive ?? this.isAlive,
       causeOfDeath: causeOfDeath ?? this.causeOfDeath,
       ageOfDeath: ageOfDeath ?? this.ageOfDeath,
-      partnerId: partnerId ?? this.partnerId,
+      partnerId: clearPartner ? null : (partnerId ?? this.partnerId),
       isMarried: isMarried ?? this.isMarried,
       educationLevel: educationLevel ?? this.educationLevel,
-      currentDegree: currentDegree ?? this.currentDegree,
-      currentJobId: currentJobId ?? this.currentJobId,
-      currentJobTitle: currentJobTitle ?? this.currentJobTitle,
-      currentSalary: currentSalary ?? this.currentSalary,
+      currentDegree: clearDegree ? null : (currentDegree ?? this.currentDegree),
+      currentJobId: clearJob ? null : (currentJobId ?? this.currentJobId),
+      currentJobTitle: clearJob ? null : (currentJobTitle ?? this.currentJobTitle),
+      currentSalary: clearJob ? null : (currentSalary ?? this.currentSalary),
       jobPerformance: (jobPerformance ?? this.jobPerformance).clamp(0, 100),
       yearsInCurrentJob: yearsInCurrentJob ?? this.yearsInCurrentJob,
       hasDriversLicense: hasDriversLicense ?? this.hasDriversLicense,

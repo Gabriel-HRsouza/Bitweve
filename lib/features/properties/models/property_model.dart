@@ -28,7 +28,10 @@ class PropertyModel {
   });
 
   bool get isVehicle => type == 'car' || type == 'motorcycle' || type == 'yacht';
-  bool get isRealEstate => type == 'house' || type == 'apartment' || type == 'mansion' || type == 'farm';
+  static const realEstateTypes = {'house', 'apartment', 'mansion', 'farm', 'studio', 'beach_house', 'penthouse', 'castle', 'commercial', 'store', 'warehouse'};
+  static const commercialTypes = {'commercial', 'store', 'warehouse'};
+  bool get isCommercial => commercialTypes.contains(type);
+  bool get isRealEstate => realEstateTypes.contains(type);
 
   PropertyModel copyWith({
     String? id,

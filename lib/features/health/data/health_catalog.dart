@@ -141,9 +141,63 @@ class HealthCatalog {
     ),
   ];
 
+  /// Condições agudas (eventos de saúde). Curam-se com tratamento ou com o tempo.
+  static const List<HealthCondition> acute = [
+    HealthCondition(
+      id: 'flu',
+      name: 'Gripe Forte',
+      category: ConditionCategory.acute,
+      description: 'Febre, dor no corpo e muito cansaço.',
+      severity: ConditionSeverity.mild,
+      supportNeeds: 'Repouso, hidratação e antitérmico.',
+      medicationName: 'Antitérmico',
+      monthlyCost: 40.0,
+    ),
+    HealthCondition(
+      id: 'fracture',
+      name: 'Fratura no Braço',
+      category: ConditionCategory.acute,
+      description: 'Um osso quebrado após um acidente.',
+      severity: ConditionSeverity.moderate,
+      supportNeeds: 'Imobilização com gesso e fisioterapia.',
+      medicationName: 'Analgésico',
+      monthlyCost: 120.0,
+    ),
+    HealthCondition(
+      id: 'burnout',
+      name: 'Síndrome de Burnout',
+      category: ConditionCategory.mentalHealth,
+      description: 'Esgotamento físico e mental causado por excesso de trabalho.',
+      severity: ConditionSeverity.moderate,
+      supportNeeds: 'Afastamento, psicoterapia e mudança de rotina.',
+      medicationName: null,
+      monthlyCost: 160.0,
+    ),
+    HealthCondition(
+      id: 'food_poisoning',
+      name: 'Intoxicação Alimentar',
+      category: ConditionCategory.acute,
+      description: 'Algo que você comeu não caiu bem.',
+      severity: ConditionSeverity.mild,
+      supportNeeds: 'Soro e dieta leve.',
+      medicationName: 'Soro oral',
+      monthlyCost: 30.0,
+    ),
+    HealthCondition(
+      id: 'back_pain',
+      name: 'Hérnia de Disco',
+      category: ConditionCategory.chronicPhysical,
+      description: 'Dor lombar intensa que limita movimentos.',
+      severity: ConditionSeverity.moderate,
+      supportNeeds: 'Fisioterapia, RPG e fortalecimento muscular.',
+      medicationName: 'Anti-inflamatório',
+      monthlyCost: 140.0,
+    ),
+  ];
+
   static HealthCondition? getById(String id) {
     try {
-      return conditions.firstWhere((c) => c.id == id);
+      return [...conditions, ...acute].firstWhere((c) => c.id == id);
     } catch (_) {
       return null;
     }

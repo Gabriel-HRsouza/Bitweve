@@ -4,7 +4,8 @@ import 'package:bitweve/core/theme/app_colors.dart';
 import 'package:bitweve/features/life_engine/presentation/providers/life_engine_provider.dart';
 import 'package:bitweve/features/life_engine/presentation/widgets/lottery_modal.dart';
 import 'package:bitweve/features/health/presentation/health_sheet.dart';
-import 'package:bitweve/features/crime/presentation/crime_sheet.dart';
+import 'package:bitweve/features/underworld/presentation/underworld_sheet.dart';
+import 'package:bitweve/shared/ui/game_ui.dart';
 import 'package:bitweve/features/businesses/presentation/business_sheet.dart';
 import 'package:bitweve/shared/widgets/bw_tap_feedback.dart';
 
@@ -206,16 +207,11 @@ class ActivitiesSheet extends ConsumerWidget {
                   icon: Icons.gavel,
                   color: const Color(0xFFEF4444),
                   title: 'Submundo & Justiça Criminal',
-                  subtitle: 'Golpes, desvios e delitos de alto risco narrativo com consequências judiciais.',
+                  subtitle: 'Crimes fictícios com minigames, 1.000 lojas, organizações, julgamento e prisão.',
                   badge: 'Justiça',
                   onTap: () {
                     Navigator.pop(context);
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const CrimeSheet(),
-                    );
+                    showGameSheet(context, const UnderworldSheet());
                   },
                 ),
               ],

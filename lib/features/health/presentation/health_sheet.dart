@@ -15,8 +15,8 @@ class HealthSheet extends ConsumerWidget {
     if (state == null) return const SizedBox.shrink();
 
     final char = state.character;
-    final conditions = ref.watch(lifeEngineServiceProvider).getActiveConditions(char.saveId);
-    final hasInsurance = ref.watch(lifeEngineServiceProvider).hasHealthInsurance(char.saveId);
+    final conditions = state.extras.conditions;
+    final hasInsurance = state.extras.hasInsurance;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.88,

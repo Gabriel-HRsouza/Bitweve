@@ -94,36 +94,16 @@ class _LotteryModalState extends ConsumerState<LotteryModal> {
 
     // Executa sorteio via provider
     final chosenList = _selectedNumbers.toList()..sort();
-    await ref.read(lifeEngineProvider.notifier).playLottery(chosenList);
-
-    // Recupera o log do sorteio gerado pelo serviço para mostrar na UI
-    final updatedState = ref.read(lifeEngineProvider).value;
-    final lastLog = updatedState?.logs.firstWhere((l) => l.category == 'lottery');
-
-    // Sorteio das 6 dezenas para exibição visual
-    final rng = Random();
-    final draw = <int>{};
-    // Sorteia respeitando o resultado
-    while (draw.length < 6) {
-      draw.add(1 + rng.nextInt(60));
+    final result = await ref.read(lifeEngineProvider.notifier).playLottery(chosenList);
+    if (result == null || result.drawn.isEmpty) {
+      if (mounted) setState(() => _isDrawing = false);
+      return;
     }
-    final sortedDraw = draw.toList()..sort();
-    final hitsCount = chosenList.where((n) => sortedDraw.contains(n)).length;
-
-    double prize = 0.0;
-    if (lastLog != null) {
-      if (lastLog.textContent.contains('12.500.000')) {
-        prize = 12500000.0;
-        _confettiController.play();
-      } else if (lastLog.textContent.contains('45.000')) {
-        prize = 45000.0;
-        _confettiController.play();
-      } else if (lastLog.textContent.contains('1.800')) {
-        prize = 1800.0;
-      } else if (lastLog.textContent.contains('25,00')) {
-        prize = 25.0;
-      }
-    }
+    // Exibe exatamente o sorteio usado pelo motor (antes era um sorteio visual diferente)
+    final sortedDraw = result.drawn;
+    final hitsCount = result.hits;
+    final prize = result.prize;
+    if (result.hits >= 5) _confettiController.play();
 
     if (mounted) {
       setState(() {

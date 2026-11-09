@@ -1,29 +1,65 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:bitweve/core/audio/audio_service.dart';
 import 'package:bitweve/core/database/database_service.dart';
-import 'package:bitweve/features/character/models/character_model.dart';
-import 'package:bitweve/features/careers/models/career_model.dart';
+import 'package:bitweve/features/character/data/character_options.dart';
 import 'package:bitweve/features/events/models/life_event.dart';
+import 'package:bitweve/features/life_engine/services/life_engine_service.dart';
+import 'package:bitweve/features/life_engine/systems/activity_system.dart';
 import 'package:bitweve/features/properties/models/property_model.dart';
 import 'package:bitweve/features/properties/models/vehicle_model.dart';
-import 'package:bitweve/features/life_engine/services/life_engine_service.dart';
 
-final databaseServiceProvider = Provider<DatabaseService>((ref) {
-  return DatabaseService();
-});
+export 'package:bitweve/features/life_engine/services/life_engine_service.dart';
 
-final audioServiceProvider = Provider<AudioService>((ref) {
-  return AudioService();
-});
+final databaseServiceProvider = Provider<DatabaseService>((ref) => DatabaseService());
+final audioServiceProvider = Provider<AudioService>((ref) => AudioService());
 
 final lifeEngineServiceProvider = Provider<LifeEngineService>((ref) {
-  final db = ref.watch(databaseServiceProvider);
-  final audio = ref.watch(audioServiceProvider);
-  return LifeEngineService(databaseService: db, audio: audio);
+  return LifeEngineService(
+    databaseService: ref.watch(databaseServiceProvider),
+    audio: ref.watch(audioServiceProvider),
+  );
+});
+
+/// Fila de notificações exibidas pelo NotificationHost.
+class NoticeQueue extends Notifier<List<GameNotice>> {
+  @override
+  List<GameNotice> build() => const [];
+
+  void pushAll(List<GameNotice> items) {
+    if (items.isEmpty) return;
+    final next = [...state, ...items];
+    state = next.length > 8 ? next.sublist(next.length - 8) : next;
+  }
+
+  GameNotice? pop() {
+    if (state.isEmpty) return null;
+    final first = state.first;
+    state = state.sublist(1);
+    return first;
+  }
+
+  void clear() => state = const [];
+}
+
+final noticeQueueProvider = NotifierProvider<NoticeQueue, List<GameNotice>>(NoticeQueue.new);
+
+/// Lista de vidas salvas (atualizada ao criar/excluir).
+final saveSummariesProvider = FutureProvider<List<SaveSummary>>((ref) async {
+  ref.watch(lifeEngineProvider.select((s) => s.value?.saveId));
+  return ref.read(databaseServiceProvider).getSaveSummaries();
+});
+
+/// Conquistas globais desbloqueadas (com data).
+final unlockedAchievementsProvider = FutureProvider<Map<String, DateTime>>((ref) async {
+  ref.watch(lifeEngineProvider.select((s) => s.value?.logs.length));
+  return ref.read(databaseServiceProvider).unlockedAchievementDates();
 });
 
 class LifeEngineNotifier extends Notifier<AsyncValue<LifeEngineState?>> {
   LifeEngineService get service => ref.read(lifeEngineServiceProvider);
+  bool _busy = false;
+  bool get busy => _busy;
 
   @override
   AsyncValue<LifeEngineState?> build() {
@@ -34,22 +70,11 @@ class LifeEngineNotifier extends Notifier<AsyncValue<LifeEngineState?>> {
   Future<void> _init() async {
     try {
       await service.initDatasets();
-      final currentSave = await service.dbService.getCurrentSave();
-      if (currentSave != null) {
-        final data = await service.dbService.loadFullLifeData(currentSave.id);
+      final current = await service.dbService.getCurrentSave();
+      if (current != null) {
+        final data = await service.dbService.loadFullLifeData(current.id);
         if (data != null) {
-          state = AsyncValue.data(
-            LifeEngineState(
-              saveId: data.save.id,
-              slotName: data.save.slotName,
-              generation: data.save.generation,
-              character: data.character,
-              npcs: data.npcs,
-              properties: data.properties,
-              investments: data.investments,
-              logs: data.logs,
-            ),
-          );
+          state = AsyncValue.data(_fromData(data));
           return;
         }
       }
@@ -59,488 +84,196 @@ class LifeEngineNotifier extends Notifier<AsyncValue<LifeEngineState?>> {
     }
   }
 
-  Future<void> startRandomLife({
-    String? countryId,
-    String? city,
-    String? gender,
-    String? firstName,
-    String? lastName,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      final newState = await service.createRandomLife(
-        countryId: countryId,
-        city: city,
-        gender: gender,
-        firstName: firstName,
-        lastName: lastName,
+  LifeEngineState _fromData(FullLifeData data) => LifeEngineState(
+        saveId: data.save.id,
+        slotName: data.save.slotName,
+        generation: data.save.generation,
+        character: data.character,
+        npcs: data.npcs,
+        properties: data.properties,
+        investments: data.investments,
+        logs: data.logs,
+        extras: data.extras,
       );
-      state = AsyncValue.data(newState);
+
+  /// Executa uma ação do motor com trava contra toques duplos.
+  Future<LifeEngineState?> act(Future<LifeEngineState> Function(LifeEngineService s, LifeEngineState st) fn) async {
+    final current = state.value;
+    if (current == null || _busy) return null;
+    _busy = true;
+    try {
+      final updated = await fn(service, current);
+      state = AsyncValue.data(updated);
+      ref.read(noticeQueueProvider.notifier).pushAll(updated.notices);
+      return updated;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      return null;
+    } finally {
+      _busy = false;
     }
   }
+
+  /// Executa uma ação que devolve um resultado extra (relatório de crime, festa...).
+  Future<T?> actResult<T>(Future<(LifeEngineState, T)> Function(LifeEngineService s, LifeEngineState st) fn) async {
+    T? result;
+    await act((s, st) async {
+      final (out, r) = await fn(s, st);
+      result = r;
+      return out;
+    });
+    return result;
+  }
+
+  Future<void> _replace(Future<LifeEngineState> Function() fn) async {
+    if (_busy) return;
+    _busy = true;
+    state = const AsyncValue.loading();
+    try {
+      final s = await fn();
+      state = AsyncValue.data(s);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    } finally {
+      _busy = false;
+    }
+  }
+
+  // ------------------------------------------------------------------ vidas
+  Future<void> createLife(CharacterSetup setup) => _replace(() => service.createLife(setup));
+
+  Future<void> startRandomLife({String? countryId, String? city, String? gender, String? firstName, String? lastName}) =>
+      _replace(() => service.createRandomLife(countryId: countryId, city: city, gender: gender, firstName: firstName, lastName: lastName));
 
   Future<void> loadSave(String saveId) async {
-    state = const AsyncValue.loading();
-    try {
+    await _replace(() async {
       await service.dbService.setCurrentSave(saveId);
       final data = await service.dbService.loadFullLifeData(saveId);
-      if (data != null) {
-        state = AsyncValue.data(
-          LifeEngineState(
-            saveId: data.save.id,
-            slotName: data.save.slotName,
-            generation: data.save.generation,
-            character: data.character,
-            npcs: data.npcs,
-            properties: data.properties,
-            investments: data.investments,
-            logs: data.logs,
-          ),
-        );
+      if (data == null) throw StateError('Vida não encontrada');
+      return _fromData(data);
+    });
+  }
+
+  Future<void> deleteSave(String saveId) async {
+    await service.dbService.deleteSave(saveId);
+    if (state.value?.saveId == saveId) {
+      final next = await service.dbService.getCurrentSave();
+      if (next != null) {
+        await loadSave(next.id);
+      } else {
+        state = const AsyncValue.data(null);
       }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } else {
+      ref.invalidate(saveSummariesProvider);
     }
   }
 
-  Future<void> advanceYear() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.advanceYear(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+  Future<void> eraseEverything() async {
+    await service.dbService.deleteAllSaves();
+    await service.initDatasets();
+    state = const AsyncValue.data(null);
+    ref.invalidate(saveSummariesProvider);
+    ref.invalidate(unlockedAchievementsProvider);
   }
 
-  Future<void> makeChoice(EventChoice choice) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.makeChoice(current, choice);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> interactNpc(String npcId, String action) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.interactWithNpc(current, npcId, action);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> applyJob(CareerModel career) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.applyForJob(current, career);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> workHard() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.workHard(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> askForRaise() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.askForRaise(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> quitJob() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.quitJob(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> buyProperty(PropertyModel prop, bool financed) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.buyProperty(current, prop, financed);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> sellProperty(String propertyId) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.sellProperty(current, propertyId);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> invest(String type, String name, String ticker, double amount) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.investMoney(current, type, name, ticker, amount);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> sellInvestment(String investmentId) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.sellInvestment(current, investmentId);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> payDebt(double amount) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.payDebt(current, amount);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> goToGym() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.goToGym(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> goToCinema() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.goToCinema(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> consultDoctor() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.consultDoctor(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> shoppingSpree() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.shoppingSpree(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> adoptPet(String petType, String petName) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.adoptPet(current, petType, petName);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> practiceHobby(String hobbyName) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.practiceHobby(current, hobbyName);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> restAndVacation() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.restAndVacation(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> postOnSocialMedia() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.postOnSocialMedia(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> playLottery(List<int> numbers) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.playLotteryDraw(current, numbers);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> commitPettyCrime() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.commitPettyCrime(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> studyExtra() async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.studyExtra(current);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> updateCharacter(CharacterModel char) async {
-    final current = state.value;
-    if (current == null) return;
-    final updated = current.copyWith(character: char);
-    state = AsyncValue.data(updated);
-    await service.dbService.saveFullLife(
-      saveId: updated.saveId,
-      slotName: updated.slotName,
-      generation: updated.generation,
-      character: updated.character,
-      npcs: updated.npcs,
-      properties: updated.properties,
-      investments: updated.investments,
-      logs: updated.logs,
-    );
+  Future<void> restartLife() async {
+    final s = state.value;
+    if (s == null) return;
+    await _replace(() => service.restartLife(s));
   }
 
   Future<void> continueAsHeir(String heirId) async {
-    final current = state.value;
-    if (current == null) return;
-    try {
-      final updated = await service.continueAsHeir(current, heirId);
-      state = AsyncValue.data(updated);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    final s = state.value;
+    if (s == null) return;
+    await _replace(() => service.continueAsHeir(s, heirId));
+  }
+
+  void clearTransient() {
+    final s = state.value;
+    if (s == null) return;
+    state = AsyncValue.data(service.clearTransient(s));
+  }
+
+  // ------------------------------------------------------------------ atalhos
+  Future<LifeEngineState?> advanceYear() => act((s, st) => s.advanceYear(st));
+  Future<LifeEngineState?> chooseEvent(int index) => act((s, st) => s.chooseEvent(st, index));
+  Future<void> makeChoice(EventChoice choice) => act((s, st) => s.makeChoice(st, choice));
+  Future<void> interactNpc(String npcId, String action) => act((s, st) => s.interactWithNpc(st, npcId, action));
+  Future<void> applyJob(String trackId, double bonus) => act((s, st) => s.applyForJob(st, trackId, interviewBonus: bonus));
+  Future<void> workHard() => act((s, st) => s.workHard(st));
+  Future<void> askForRaise() => act((s, st) => s.askForRaise(st));
+  Future<void> quitJob() => act((s, st) => s.quitJob(st));
+  Future<void> buyProperty(PropertyModel p, bool financed) => act((s, st) => s.buyProperty(st, p, financed));
+  Future<void> sellProperty(String id) => act((s, st) => s.sellProperty(st, id));
+  Future<void> invest(String type, String name, String ticker, double amount) => act((s, st) => s.investMoney(st, type, name, ticker, amount));
+  Future<void> sellInvestment(String id) => act((s, st) => s.sellInvestment(st, id));
+  Future<void> payDebt(double amount) => act((s, st) => s.payDebt(st, amount));
+  Future<void> studyExtra() => act((s, st) => s.studyExtra(st));
+  Future<void> adoptPet(String type, String name) => act((s, st) => s.adoptPet(st, type, name));
+  Future<void> practiceHobby(String name) => act((s, st) => s.practiceHobby(st, name));
+  Future<void> postOnSocialMedia([String kind = 'photo']) => act((s, st) => s.postOnSocialMedia(st, kind));
+  Future<void> giveInterview() => act((s, st) => s.giveInterview(st));
+  Future<void> attendGala() => act((s, st) => s.attendGala(st));
+  Future<void> seekSponsor() => act((s, st) => s.seekSponsor(st));
+
+  // Atividades
+  Future<void> goToGym() => act((s, st) => s.goToGym(st));
+  Future<void> goToCinema() => act((s, st) => s.goToCinema(st));
+  Future<void> shoppingSpree() => act((s, st) => s.shoppingSpree(st));
+  Future<void> restAndVacation() => act((s, st) => s.restAndVacation(st));
+  Future<void> doActivity(String id) => act((s, st) => s.doActivity(st, id));
+
+  // Missões
+  Future<void> claimDailyMission(String id) => act((s, st) => s.claimDailyMission(st, id));
+  Future<void> claimLifeMission(String id) => act((s, st) => s.claimLifeMission(st, id));
+  Future<void> refreshDaily() => act((s, st) => s.refreshDaily(st));
+
+  Future<LotteryResult?> playLottery(List<int> numbers) async {
+    LotteryResult? result;
+    await act((s, st) async {
+      final (out, r) = await s.playLotteryDraw(st, numbers);
+      result = r;
+      return out;
+    });
+    return result;
   }
 
   // Saúde
-  Future<void> toggleHealthInsurance() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.toggleHealthInsurance(current));
-  }
+  Future<void> toggleHealthInsurance() => act((s, st) => s.toggleHealthInsurance(st));
+  Future<void> consultPublicHealth() => act((s, st) => s.consultPublicHealth(st));
+  Future<void> consultGeneralPractitioner() => act((s, st) => s.consultGeneralPractitioner(st));
+  Future<void> consultPsychologist() => act((s, st) => s.consultPsychologist(st));
+  Future<void> consultPsychiatrist() => act((s, st) => s.consultPsychiatrist(st));
+  Future<void> consultCardiologist() => act((s, st) => s.consultCardiologist(st));
+  Future<void> buyPrescribedMedicine() => act((s, st) => s.buyPrescribedMedicine(st));
+  Future<void> treatSpecificCondition(String id) => act((s, st) => s.treatSpecificCondition(st, id));
 
-  Future<void> consultPublicHealth() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.consultPublicHealth(current));
-  }
-
-  Future<void> consultGeneralPractitioner() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.consultGeneralPractitioner(current));
-  }
-
-  Future<void> consultPsychologist() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.consultPsychologist(current));
-  }
-
-  Future<void> consultPsychiatrist() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.consultPsychiatrist(current));
-  }
-
-  Future<void> consultCardiologist() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.consultCardiologist(current));
-  }
-
-  Future<void> buyPrescribedMedicine() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.buyPrescribedMedicine(current));
-  }
-
-  Future<void> treatSpecificCondition(String conditionId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.treatSpecificCondition(current, conditionId));
-  }
-
-  // Cripto
-  Future<void> buyCrypto(String symbol, double amount) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.buyCrypto(current, symbol, amount));
-  }
-
-  Future<void> sellCrypto(String symbol, double amount) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.sellCrypto(current, symbol, amount));
-  }
-
-  // Veículos
-  Future<void> buyVehicle(VehicleModel v) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.buyVehicle(current, v));
-  }
-
-  Future<void> serviceVehicle(String vehicleId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.serviceVehicle(current, vehicleId));
-  }
-
-  Future<void> sellVehicle(String vehicleId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.sellVehicle(current, vehicleId));
-  }
-
-  // Empresas
-  Future<void> startBusiness(String name, String industry) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.startBusiness(current, name, industry));
-  }
-
-  Future<void> hireEmployees(String businessId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.hireEmployees(current, businessId));
-  }
-
-  Future<void> investMarketing(String businessId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.investMarketing(current, businessId));
-  }
-
-  Future<void> sellBusiness(String businessId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.sellBusiness(current, businessId));
-  }
-
-  // Crime & Justiça
-  Future<void> attemptCrime(String crimeId) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.attemptCrime(current, crimeId));
-  }
-
-  Future<void> appealCriminalRecord() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.appealCriminalRecord(current));
-  }
+  // Cripto / veículos / empresas / crime
+  Future<void> buyCrypto(String symbol, double amount) => act((s, st) => s.buyCrypto(st, symbol, amount));
+  Future<void> sellCrypto(String symbol, double amount) => act((s, st) => s.sellCrypto(st, symbol, amount));
+  Future<void> buyVehicle(VehicleModel v) => act((s, st) => s.buyVehicle(st, v));
+  Future<void> buyVehicleListing(String id) => act((s, st) => s.buyVehicleListing(st, id));
+  Future<void> serviceVehicle(String id) => act((s, st) => s.serviceVehicle(st, id));
+  Future<void> sellVehicle(String id) => act((s, st) => s.sellVehicle(st, id));
+  Future<void> toggleVehicleInsurance(String id) => act((s, st) => s.toggleVehicleInsurance(st, id));
+  Future<void> buyPropertyListing(String id, bool financed) => act((s, st) => s.buyPropertyListing(st, id, financed));
+  Future<void> toggleRent(String id) => act((s, st) => s.toggleRent(st, id));
+  Future<void> moveInto(String id) => act((s, st) => s.moveInto(st, id));
+  Future<void> renovate(String id) => act((s, st) => s.renovate(st, id));
+  Future<void> startBusiness(String name, String industry) => act((s, st) => s.startBusiness(st, name, industry));
+  Future<void> hireEmployees(String id) => act((s, st) => s.hireEmployees(st, id));
+  Future<void> investMarketing(String id) => act((s, st) => s.investMarketing(st, id));
+  Future<void> sellBusiness(String id) => act((s, st) => s.sellBusiness(st, id));
+  Future<void> attemptCrime(String id) => act((s, st) => s.attemptCrime(st, id));
+  Future<void> appealCriminalRecord() => act((s, st) => s.appealCriminalRecord(st));
 
   // Modo Deus
-  Future<void> godModeAddMoney(double amount) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.godModeAddMoney(current, amount));
-  }
-
-  Future<void> godModeSetStats({int? health, int? happiness, int? smarts, int? looks}) async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.godModeSetStats(
-      current,
-      health: health,
-      happiness: happiness,
-      smarts: smarts,
-      looks: looks,
-    ));
-  }
-
-  Future<void> godModeCureAll() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.godModeCureAll(current));
-  }
-
-  Future<void> godModeClearRecord() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.godModeClearRecord(current));
-  }
-
-  Future<void> godModeJackpot() async {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(await service.godModeJackpot(current));
-  }
+  Future<void> godModeAddMoney(double amount) => act((s, st) => s.godModeAddMoney(st, amount));
+  Future<void> godModeSetStats({int? health, int? happiness, int? smarts, int? looks}) =>
+      act((s, st) => s.godModeSetStats(st, health: health, happiness: happiness, smarts: smarts, looks: looks));
+  Future<void> godModeCureAll() => act((s, st) => s.godModeCureAll(st));
+  Future<void> godModeClearRecord() => act((s, st) => s.godModeClearRecord(st));
+  Future<void> godModeJackpot() => act((s, st) => s.godModeJackpot(st));
 }
 
 final lifeEngineProvider =

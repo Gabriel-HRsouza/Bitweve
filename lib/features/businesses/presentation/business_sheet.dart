@@ -14,7 +14,7 @@ class BusinessSheet extends ConsumerWidget {
     final state = ref.watch(lifeEngineProvider).value;
     if (state == null) return const SizedBox.shrink();
 
-    final businesses = ref.watch(lifeEngineServiceProvider).getBusinesses(state.character.saveId);
+    final businesses = state.extras.businesses;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.88,

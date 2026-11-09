@@ -23,7 +23,7 @@ class _CryptoModalState extends ConsumerState<CryptoModal> {
     if (state == null) return const SizedBox.shrink();
 
     final service = ref.watch(lifeEngineServiceProvider);
-    final wallet = service.getCryptoWallet(state.character.saveId);
+    final wallet = service.cryptoWallet(state);
     final currentAsset = wallet.firstWhere(
       (a) => a.symbol == _selectedSymbol,
       orElse: () => wallet.first,

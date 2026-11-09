@@ -18,6 +18,11 @@ enum RelationshipType {
   coworker,
   boss,
   rival,
+  classmate,
+  crush,
+  teacher,
+  inmate,
+  collegeMate,
 }
 
 class NpcModel {
@@ -98,7 +103,17 @@ class NpcModel {
       case RelationshipType.boss:
         return 'Chefe';
       case RelationshipType.rival:
-        return 'Rival';
+        return 'Inimigo(a)';
+      case RelationshipType.classmate:
+        return 'Colega de Escola';
+      case RelationshipType.crush:
+        return 'Paquera';
+      case RelationshipType.teacher:
+        return gender == 'female' ? 'Professora' : 'Professor';
+      case RelationshipType.inmate:
+        return 'Colega de cela';
+      case RelationshipType.collegeMate:
+        return 'Colega de Faculdade';
     }
   }
 
@@ -143,6 +158,20 @@ class NpcModel {
       memories: memories ?? this.memories,
     );
   }
+
+  bool get isParent => relationshipType == RelationshipType.father || relationshipType == RelationshipType.mother ||
+      relationshipType == RelationshipType.stepfather || relationshipType == RelationshipType.stepmother;
+  bool get isSibling => relationshipType == RelationshipType.brother || relationshipType == RelationshipType.sister;
+  bool get isChild => relationshipType == RelationshipType.son || relationshipType == RelationshipType.daughter;
+  bool get isGrandparent => relationshipType == RelationshipType.grandfather || relationshipType == RelationshipType.grandmother;
+  bool get isFamily => isParent || isSibling || isChild || isGrandparent || relationshipType == RelationshipType.spouse;
+  bool get isRomantic => relationshipType == RelationshipType.partner || relationshipType == RelationshipType.spouse ||
+      relationshipType == RelationshipType.crush;
+  bool get isWork => relationshipType == RelationshipType.coworker || relationshipType == RelationshipType.boss;
+  bool get isSocial => relationshipType == RelationshipType.friend || relationshipType == RelationshipType.rival ||
+      relationshipType == RelationshipType.classmate || relationshipType == RelationshipType.exPartner ||
+      relationshipType == RelationshipType.collegeMate || relationshipType == RelationshipType.inmate;
+  bool get isSchoolmate => relationshipType == RelationshipType.classmate || relationshipType == RelationshipType.collegeMate;
 
   static RelationshipType parseRelationType(String val) {
     return RelationshipType.values.firstWhere(

@@ -106,7 +106,7 @@ class _GarageModalState extends ConsumerState<GarageModal> with SingleTickerProv
     final state = ref.watch(lifeEngineProvider).value;
     if (state == null) return const SizedBox.shrink();
 
-    final ownedVehicles = ref.watch(lifeEngineServiceProvider).getOwnedVehicles(state.character.saveId);
+    final ownedVehicles = state.extras.vehicles;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.88,

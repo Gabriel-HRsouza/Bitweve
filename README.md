@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.0.0.apk">
-    <img src="https://img.shields.io/badge/Download_APK-Direto_(v1.0.0)-00F2FE?style=for-the-badge&logo=android&logoColor=black" alt="Download APK Direto" />
+  <a href="https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.2.0.apk">
+    <img src="https://img.shields.io/badge/Download_APK-Direto_(v1.2.0)-00F2FE?style=for-the-badge&logo=android&logoColor=black" alt="Download APK Direto" />
   </a>
   <a href="https://github.com/Gabriel-HRsouza/Bitweve/releases">
     <img src="https://img.shields.io/badge/GitHub-Releases-10B981?style=for-the-badge&logo=github&logoColor=white" alt="Releases" />
@@ -24,9 +24,9 @@
 
 ### Método Recomendado: Download Direto (Super Fácil)
 1. **Baixe o arquivo diretamente no seu celular:**  
-   👉 **[Clique aqui para Baixar o BitWeve v1.0.0 APK](https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.0.0.apk)**  
-   *(Também disponível na pasta `release/BitWeve-v1.0.0.apk` neste repositório ou na aba [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases))*.
-2. Ao concluir o download, abra o arquivo baixado (`BitWeve-v1.0.0.apk`) pela barra de notificações ou pelo gerenciador de arquivos do celular.
+   👉 **[Clique aqui para Baixar o BitWeve v1.2.0 APK](https://github.com/Gabriel-HRsouza/Bitweve/raw/main/release/BitWeve-v1.2.0.apk)**  
+   *(Também disponível na pasta `release/BitWeve-v1.2.0.apk` neste repositório ou na aba [Releases](https://github.com/Gabriel-HRsouza/Bitweve/releases))*.
+2. Ao concluir o download, abra o arquivo baixado (`BitWeve-v1.2.0.apk`) pela barra de notificações ou pelo gerenciador de arquivos do celular.
 3. Se o Android solicitar autorização para instalar de fontes desconhecidas pelo navegador, toque em **Permitir desta fonte**.
 4. Toque em **Instalar** e abra o jogo! Todos os sistemas funcionam 100% offline e gratuitamente.
 
@@ -75,7 +75,17 @@ Se você utiliza AltStore ou Sideloadly no Windows ou Mac:
 - **Mercado Cripto & Bolsa**: Gráficos dinâmicos interativos com Bitcoin (BTC), Ethereum (ETH) e BitWeve Token (BWV), com ordens de compra e venda em tempo real e volatilidade calculada anualmente.
 - **Concessionária & Garagem**: Catálogo completo com motocicletas, sedãs, SUVs blindados, esportivos, iates e jatos, com gestão de manutenção anual, seguros e revenda.
 - **Empreendedorismo & Startups**: Fundação de empresas de tecnologia, restaurantes e agências. Contratação de equipes, investimentos em marketing, valuation dinâmico e realização de lucro via venda da empresa (Exit).
-- **Submundo, Crimes & Justiça**: Ações narrativas de risco, mandados de prisão em flagrante, antecedentes criminais e contratação de bancas de advogados para anulação de sentenças.
+- **Escola Jogável**: Escola real (pública, particular ou internacional) com desempenho, popularidade, relação com professores, faltas, advertências, suspensões, extracurriculares, grupos escolares, eventos, baile, enfermaria, provas com questões e professores interativos.
+- **Faculdade Completa**: Escolha de instituição (pública, particular, elite, EAD) e curso, mensalidade, bolsas, provas, trabalhos em grupo, TCC, festas, clubes (atlética, empresa júnior, pesquisa), intercâmbio, estágios, reprovação, abandono e formatura — em quatro abas: Curso, Atividades, Colegas e Carreira.
+- **Colegas e Personagens Únicos**: Milhares de combinações de nomes; cada NPC tem personalidade (12 tipos), interesses, popularidade, manias, humor e histórico. A personalidade decide se a pessoa aceita, recusa, fica feliz, irritada ou desconfortável.
+- **Interações Profundas**: Conversar, elogiar, brincar, presentear, chamar para sair, convidar para festas, acordar, flertar, namorar, casar, pedir desculpas, reconciliar, discutir, bloquear/desbloquear e editar apelido. Romance só entre adultos ou entre adolescentes de idade próxima; momentos íntimos são exclusivos de adultos, com consentimento e sem conteúdo explícito.
+- **App de Namoro “Faísca” (18+)**: Perfis com fotos, bio, interesses e objetivos; compatibilidade por interesses, personalidade, idade, status, objetivos e histórico; curtidas, super curtidas, matches recíprocos, chat com reações, encontros, desfazer match e bloqueio.
+- **Rede Social “Pulso”**: 13 categorias de posts com imagens, legendas, curtidas, comentários (com resposta), compartilhamentos, seguidores, verificação, tendências do ano, mensagens diretas, publis de marcas, posts virais e polêmicas.
+- **Festas Interativas**: Planejador em etapas (tipo, local, convidados, orçamento, decoração, comida, música, atividade) com incidentes aleatórios, reação individual de cada convidado e fotos para o Pulso.
+- **Imóveis Administráveis**: Casas, apartamentos, coberturas, mansões, imóveis comerciais; ilustração de cada imóvel, bairro, tamanho, estado, decoração (6 estilos), aluguel, reforma, mudança e festas.
+- **Submundo com Minigames**: Crimes fictícios e abstratos, cada um com minigame próprio — Labirinto (furto, estilo arena com perseguidores), Lábia (golpes/negociação), Cofre, Memória (crimes financeiros) e Fuga (contrabando). Catálogo procedural de 1.000 lojas fictícias com fachada ilustrada, organizações com cargos e missões, mercado clandestino, notoriedade e atenção policial.
+- **Justiça e Prisão**: Prisão em flagrante, fiança, escolha de advogado, declaração de culpa/inocência, julgamento, multa, condicional ou pena; tela de prisão com rotina (treino, estudo, trabalho com remição, reabilitação, brigas), colegas de cela, recurso e audiência de condicional. Consequências na carreira, estudos e família.
+- **Barra de Status Permanente**: Avatar, nome, idade, situação, saldo, patrimônio e indicadores (saúde, estresse, prisão, processo, polícia, relacionamento e mensagens) em todas as telas.
 - **Modo Deus Gratuito (God Mode)**: Painel acessível pelo ícone de raio dourado na AppBar para injeção de fundos, manipulação livre de atributos, milagre da cura total, indulto judicial e vitória garantida na loteria.
 - **Avatar Dinâmico com Expressões**: Sistema próprio de avatar vetorial procedural que reflete as emoções do protagonista (felicidade, tristeza, raiva, surpresa, doença, amor e medo).
 - **Relações Familiares e NPCs Autônomos**: Pais, parentes e amigos envelhecem de forma sincronizada com o protagonista, possuem profissões e emoções próprias, e reagem a interações.
@@ -101,6 +111,15 @@ O projeto foi organizado segundo os padrões de Clean Architecture modular:
 - `lib/features/properties/`: Inventário de bens, imóveis e veículos.
 - `lib/features/events/`: Repositório de eventos aleatórios e ramificações de escolha.
 - `lib/features/settings/`: Gerenciador de múltiplos arquivos de save e configurações gerais.
+- `lib/features/school/`: Vida escolar e universitária (catálogos e tela de escola/faculdade).
+- `lib/features/dating/`: App de namoro Faísca.
+- `lib/features/social_media/`: Rede social Pulso.
+- `lib/features/parties/`: Planejador e resultados de festas.
+- `lib/features/underworld/`: Crimes, 1.000 lojas procedurais, organizações, julgamento e prisão.
+- `lib/features/minigames/`: Minigames (labirinto, lábia, cofre, memória, fuga e provas).
+- `lib/features/life_engine/systems/`: Um sistema por domínio (`school_system`, `underworld_system`, `social_media_system`, `dating_system`, `party_system`...), todos ligados à passagem de ano.
+- `lib/shared/ui/scene_art.dart`: Ilustrações procedurais de lojas, imóveis, escolas e fotos.
+- `tools/generate_audio_v3.py`: Síntese dos novos efeitos sonoros (coleta, alarme, match, cela, festa, swipe).
 
 ---
 
